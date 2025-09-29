@@ -72,5 +72,6 @@ jobs:
             php artisan optimize:clear
             mkdir -p storage/framework/views
             chown -R www-data:www-data storage
+            chown -R www-data:www-data bootstrap
             chmod -R 775 storage
             chmod -R 777 storage/app/public
