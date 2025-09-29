@@ -1,4 +1,4 @@
-name: ci-build-amulet-voice
+name: ci-build-reckon
 on:
   push:
     branches:

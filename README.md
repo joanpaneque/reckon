@@ -1,61 +1,147 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# reckon
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+a professional time tracking and project management application built with Laravel and Vue.js. designed for freelancers, consultants, and small teams who need to track work time and calculate project costs efficiently.
 
-## About Laravel
+## features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **work order management**: create and organize projects with custom hourly rates
+- **time tracking**: start/stop timers for individual work sessions with real-time updates
+- **cost calculation**: automatic cost computation based on tracked time and hourly rates
+- **entry management**: detailed work entries with descriptions and timestamps
+- **responsive interface**: modern, clean UI built with Tailwind CSS and Vue.js
+- **user authentication**: secure login system with session management
+- **real-time updates**: live timer displays and instant data synchronization
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## tech stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **backend**: Laravel 12 with PHP 8.2+
+- **frontend**: Vue.js 3 with Inertia.js for seamless SPA experience
+- **styling**: Tailwind CSS with custom components
+- **database**: MySQL with Laravel Eloquent ORM
+- **authentication**: Laravel Sanctum
+- **development**: Vite for fast builds and hot reloading
+- **deployment**: Docker support with Laravel Sail
 
-## Learning Laravel
+## requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Docker and Docker Compose
+- Git
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. clone the repository:
+```bash
+git clone https://github.com/joanpaneque/reckon
+cd reckon
+```
 
-## Laravel Sponsors
+2. create environment file:
+```bash
+cp .env.example .env
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. start the Docker containers:
+```bash
+./vendor/bin/sail up -d
+```
 
-### Premium Partners
+4. install PHP dependencies:
+```bash
+./vendor/bin/sail composer install
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. generate application key:
+```bash
+./vendor/bin/sail artisan key:generate
+```
 
-## Contributing
+6. run database migrations:
+```bash
+./vendor/bin/sail artisan migrate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+7. install JavaScript dependencies:
+```bash
+./vendor/bin/sail npm install
+```
 
-## Code of Conduct
+8. build frontend assets for production:
+```bash
+./vendor/bin/sail npm run build
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## development
 
-## Security Vulnerabilities
+the project uses Laravel Sail for a consistent Docker-based development environment:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+# start all services (Laravel, MySQL, Vite)
+./vendor/bin/sail up -d
 
-## License
+# start development with hot reloading
+./vendor/bin/sail npm run dev
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+alternatively, use the built-in composer script for concurrent services:
+
+```bash
+# start all services (Laravel, queue, logs, Vite) simultaneously
+./vendor/bin/sail composer run dev
+```
+
+### useful sail commands
+
+```bash
+# access the application container
+./vendor/bin/sail shell
+
+# run artisan commands
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan tinker
+
+# run tests
+./vendor/bin/sail test
+
+# view logs
+./vendor/bin/sail logs
+
+# stop all services
+./vendor/bin/sail down
+```
+
+## usage
+
+1. **create work orders**: set up projects with names and hourly rates
+2. **track time**: create entries within work orders and use the timer functionality
+3. **monitor progress**: view real-time timers and accumulated time/costs
+4. **manage entries**: edit, delete, and organize work sessions
+5. **calculate costs**: automatic cost computation based on time and rates
+
+## project structure
+
+```
+reckon/
+├── app/
+│   ├── Http/Controllers/WorkOrders/    # work order and entry controllers
+│   └── Models/                         # Eloquent models
+├── resources/
+│   ├── js/
+│   │   ├── Components/                 # Vue.js components
+│   │   ├── Layouts/                    # application layouts
+│   │   └── Pages/                      # Inertia.js pages
+│   └── css/                           # stylesheets
+├── database/migrations/               # database schema
+└── routes/web.php                     # application routes
+```
+
+## key components
+
+- **work orders**: main project containers with hourly rates
+- **work order entries**: individual time tracking sessions
+- **live timer**: real-time countdown display for active sessions
+- **time display**: formatted time and cost calculations
+- **authentication**: secure user management system
+
+## license
+
+this project is open-sourced software licensed under the MIT license.
