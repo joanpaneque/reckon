@@ -6,8 +6,13 @@ import LiveTimer from '@/Components/LiveTimer.vue';
 import StaticTimer from '@/Components/StaticTimer.vue';
 import TimeSummary from '@/Components/TimeSummary.vue';
 import Modal from '@/Components/Modal.vue';
-import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import SharedUsersIndicator from '@/Components/SharedUsersIndicator.vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Crown } from 'lucide-vue-next';
+
+const page = usePage();
+const isOwner = computed(() => props.workOrder.user_id === page.props.auth.user.id);
 
 const props = defineProps({
   workOrder: {
@@ -24,6 +29,10 @@ const props = defineProps({
   },
   totalCost: {
     type: Number,
+    required: true,
+  },
+  canEdit: {
+    type: Boolean,
     required: true,
   },
 });
@@ -65,7 +74,13 @@ const stopTimer = (entryId) => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-gray-900">{{ workOrder.name }}</h1>
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-medium text-gray-900 flex items-center gap-2">
+              {{ workOrder.name }}
+              <Crown v-if="isOwner" :size="20" class="text-yellow-500" />
+            </h1>
+            <SharedUsersIndicator v-if="workOrder.shared_with" :shared-with="workOrder.shared_with" />
+          </div>
         </div>
         <LinkButton :href="route('work-orders.index')" variant="secondary">
           Back to list
@@ -75,7 +90,7 @@ const stopTimer = (entryId) => {
       <TimeSummary :total-seconds="totalTime" :total-cost="totalCost" :hour-price="workOrder.hour_price" />
 
       <Card title="Entries">
-        <div class="mb-4">
+        <div v-if="canEdit" class="mb-4">
           <LinkButton :href="route('work-orders.entries.create', workOrder.id)" variant="primary" size="sm">
             Create new entry
           </LinkButton>
@@ -90,7 +105,7 @@ const stopTimer = (entryId) => {
               <LiveTimer v-if="entry.started_at && !entry.ended_at" :started-at="entry.started_at" />
               <StaticTimer v-if="entry.started_at && entry.ended_at" :started-at="entry.started_at" :ended-at="entry.ended_at" />
             </div>
-            <div class="flex items-center gap-2">
+            <div v-if="canEdit" class="flex items-center gap-2">
               <LinkButton
                 v-if="entry.started_at && !entry.ended_at"
                 @click="stopTimer(entry.id)"

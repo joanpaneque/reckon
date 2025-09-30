@@ -22,6 +22,12 @@ class WorkOrder extends Model
         return $this->hasMany(WorkOrderEntry::class);
     }
 
+    public function sharedWith()
+    {
+        return $this->belongsToMany(User::class, 'shared_work_orders', 'work_order_id', 'shared_with_id')
+            ->withPivot('permission')->withTimestamps();
+    }
+
     public function getTotalTimeAndCost()
     {
         $completedEntries = $this->entries()

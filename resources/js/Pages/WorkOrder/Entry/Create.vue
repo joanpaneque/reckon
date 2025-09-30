@@ -36,11 +36,11 @@ const submit = () => {
 </script>
 
 <template>
-  <AppLayout title="Create Entry">
+  <AppLayout title="Create entry">
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-gray-900">Create Entry</h1>
+          <h1 class="text-2xl font-medium text-gray-900">Create entry</h1>
           <p class="text-sm text-gray-500 mt-1">{{ workOrder.name }}</p>
         </div>
         <LinkButton :href="route('work-orders.show', workOrder.id)" variant="secondary">
@@ -56,7 +56,7 @@ const submit = () => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
             <Textarea v-model="form.description" :error="form.errors.description" />
           </div>
 
@@ -81,7 +81,7 @@ const submit = () => {
 
           <div class="flex justify-end">
             <Button type="submit" :disabled="form.processing">
-              {{ startNow ? 'Start Entry' : 'Create Entry' }}
+              {{ startNow ? 'Start entry' : 'create Entry' }}
             </Button>
           </div>
         </form>

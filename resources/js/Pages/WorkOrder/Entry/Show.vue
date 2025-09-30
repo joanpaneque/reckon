@@ -15,6 +15,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  canEdit: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const stopTimer = (entryId) => {
@@ -64,7 +68,7 @@ const stopTimer = (entryId) => {
             <StaticTimer v-if="workOrderEntry.started_at && workOrderEntry.ended_at" :started-at="workOrderEntry.started_at" :ended-at="workOrderEntry.ended_at" />
           </div>
 
-          <div class="flex items-center gap-2 pt-4 border-t border-gray-100">
+          <div v-if="canEdit" class="flex items-center gap-2 pt-4 border-t border-gray-100">
             <LinkButton
               v-if="workOrderEntry.started_at && !workOrderEntry.ended_at"
               @click="stopTimer(workOrderEntry.id)"

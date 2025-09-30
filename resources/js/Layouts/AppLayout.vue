@@ -1,8 +1,10 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 import Button from '@/Components/Button.vue';
-import { Home, ClipboardList } from 'lucide-vue-next';
+import Modal from '@/Components/Modal.vue';
+import { Home, ClipboardList, Users } from 'lucide-vue-next';
 
 defineProps({
   title: {
@@ -12,22 +14,19 @@ defineProps({
 });
 
 const page = usePage();
+const showLogoutModal = ref(false);
 
 const logout = () => {
-  if (confirm('Are you sure you want to sign out?')) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = route('logout');
+  showLogoutModal.value = true;
+};
 
-    const csrfToken = document.createElement('input');
-    csrfToken.type = 'hidden';
-    csrfToken.name = '_token';
-    csrfToken.value = page.props.csrf_token;
-    form.appendChild(csrfToken);
+const confirmLogout = () => {
+  router.post(route('logout'));
+  showLogoutModal.value = false;
+};
 
-    document.body.appendChild(form);
-    form.submit();
-  }
+const cancelLogout = () => {
+  showLogoutModal.value = false;
 };
 </script>
 
@@ -58,6 +57,14 @@ const logout = () => {
           <ClipboardList :size="16" />
           Work orders
         </Link>
+        <Link
+          :href="route('friends.index')"
+          class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
+          :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('friends.*') }"
+        >
+          <Users :size="16" />
+          Friends
+        </Link>
       </nav>
     </aside>
 
@@ -80,5 +87,18 @@ const logout = () => {
         <slot />
       </main>
     </div>
+
+    <!-- Logout Modal -->
+    <Modal
+      :show="showLogoutModal"
+      title="Sign Out"
+      message="Are you sure you want to sign out?"
+      confirm-text="Sign Out"
+      cancel-text="Cancel"
+      confirm-variant="danger"
+      @confirm="confirmLogout"
+      @cancel="cancelLogout"
+      @close="cancelLogout"
+    />
   </div>
 </template>

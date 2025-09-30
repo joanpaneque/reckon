@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderEntry;
+use App\Http\Controllers\WorkOrders\WorkOrdersController;
 
 class WorkOrderEntriesController extends Controller
 {
@@ -61,12 +62,13 @@ class WorkOrderEntriesController extends Controller
      */
     public function show(string $workOrder, string $entry)
     {
-        $workOrderModel = WorkOrder::findOrFail($workOrder);
+        $workOrderModel = WorkOrder::with('sharedWith')->findOrFail($workOrder);
         $workOrderEntry = $workOrderModel->entries()->findOrFail($entry);
 
         return Inertia::render('WorkOrder/Entry/Show', [
             'workOrder' => $workOrderModel,
             'workOrderEntry' => $workOrderEntry,
+            'canEdit' => WorkOrdersController::checkEditPermission($workOrderModel),
         ]);
     }
 
@@ -75,7 +77,12 @@ class WorkOrderEntriesController extends Controller
      */
     public function edit(string $workOrder, string $entry)
     {
-        $workOrderModel = WorkOrder::findOrFail($workOrder);
+        $workOrderModel = WorkOrder::with('sharedWith')->findOrFail($workOrder);
+
+        if (!WorkOrdersController::checkEditPermission($workOrderModel)) {
+            abort(404);
+        }
+
         $workOrderEntry = $workOrderModel->entries()->findOrFail($entry);
 
         return Inertia::render('WorkOrder/Entry/Edit', [
@@ -89,7 +96,12 @@ class WorkOrderEntriesController extends Controller
      */
     public function update(Request $request, string $workOrder, string $entry)
     {
-        $workOrderModel = WorkOrder::findOrFail($workOrder);
+        $workOrderModel = WorkOrder::with('sharedWith')->findOrFail($workOrder);
+
+        if (!WorkOrdersController::checkEditPermission($workOrderModel)) {
+            abort(404);
+        }
+
         $workOrderEntry = $workOrderModel->entries()->findOrFail($entry);
 
         // Si solo se envía ended_at (para stop timer), hacer update directo
@@ -110,7 +122,7 @@ class WorkOrderEntriesController extends Controller
 
         $workOrderEntry->update($validated);
 
-        return redirect()->route('work-orders.entries.index', $workOrder);
+        return redirect()->route('work-orders.show', $workOrder);
     }
 
     /**
@@ -118,7 +130,12 @@ class WorkOrderEntriesController extends Controller
      */
     public function destroy(string $workOrder, string $entry)
     {
-        $workOrderModel = WorkOrder::findOrFail($workOrder);
+        $workOrderModel = WorkOrder::with('sharedWith')->findOrFail($workOrder);
+
+        if (!WorkOrdersController::checkEditPermission($workOrderModel)) {
+            abort(404);
+        }
+
         $workOrderEntry = $workOrderModel->entries()->findOrFail($entry);
         $workOrderEntry->delete();
 
