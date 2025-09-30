@@ -33,7 +33,7 @@ const receiverName = computed(() => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-medium text-gray-900">Friendship details</h1>
-        <LinkButton :href="route('friends.index')" variant="secondary">
+        <LinkButton prefetch :href="route('friends.index')" variant="secondary">
           Back to list
         </LinkButton>
       </div>
@@ -75,6 +75,7 @@ const receiverName = computed(() => {
 
         <div class="flex gap-2 mt-6 pt-4 border-t border-gray-100">
           <LinkButton
+            prefetch
             v-if="friendship.status === 'pending'"
             :href="route('friends.edit', friendship.id)"
             variant="primary"
@@ -82,6 +83,7 @@ const receiverName = computed(() => {
             Respond
           </LinkButton>
           <LinkButton
+            prefetch
             :href="route('friends.index')"
             variant="secondary"
           >

@@ -6,6 +6,7 @@ const props = defineProps({
   href: String,
   method: String,
   data: Object,
+  prefetch: Boolean,
   variant: {
     type: String,
     default: 'secondary',
@@ -39,7 +40,7 @@ const classes = computed(() => {
 </script>
 
 <template>
-  <Link v-if="props.href" :href="props.href" :method="props.method" :data="props.data" :class="classes">
+  <Link v-if="props.href" :href="props.href" :method="props.method" :data="props.data" :class="classes" :prefetch="props.prefetch">
     <slot />
   </Link>
   <button v-else :class="classes" @click="$emit('click')">

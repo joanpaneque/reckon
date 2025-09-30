@@ -20,7 +20,7 @@ const submit = () => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-medium text-gray-900">Add friend</h1>
-        <LinkButton :href="route('friends.index')" variant="secondary">
+        <LinkButton prefetch :href="route('friends.index')" variant="secondary">
           Back to list
         </LinkButton>
       </div>

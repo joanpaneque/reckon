@@ -70,7 +70,7 @@ const getStatusText = (status) => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-medium text-gray-900">Friends</h1>
-        <LinkButton :href="route('friends.create')" variant="primary">
+        <LinkButton prefetch :href="route('friends.create')" variant="primary">
           Add friend
         </LinkButton>
       </div>
@@ -79,7 +79,7 @@ const getStatusText = (status) => {
         <div class="space-y-4">
           <div v-for="friendship in incomingAndFriends.data" :key="friendship.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
             <div class="flex-1 flex items-center gap-3">
-              <LinkButton :href="route('friends.show', friendship.id)" variant="secondary">
+              <LinkButton prefetch :href="route('friends.show', friendship.id)" variant="secondary">
                 {{ getFriendInfo(friendship) }}
               </LinkButton>
               <span
@@ -92,7 +92,7 @@ const getStatusText = (status) => {
             <div class="flex items-center gap-2">
               <LinkButton
                 v-if="friendship.status === 'pending'"
-                :href="route('friends.edit', friendship.id)"
+                prefetch :href="route('friends.edit', friendship.id)"
                 variant="primary"
                 size="sm"
               >

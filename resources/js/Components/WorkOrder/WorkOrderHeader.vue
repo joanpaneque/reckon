@@ -20,7 +20,7 @@ defineProps({
 <template>
   <div class="flex items-center justify-between">
     <h1 class="text-2xl font-medium text-gray-900">{{ title }}</h1>
-    <LinkButton v-if="backRoute" :href="backRoute" variant="secondary">
+    <LinkButton prefetch v-if="backRoute" :href="backRoute" variant="secondary">
       {{ backLabel }}
     </LinkButton>
   </div>

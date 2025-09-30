@@ -82,7 +82,7 @@ const stopTimer = (entryId) => {
             <SharedUsersIndicator v-if="workOrder.shared_with" :shared-with="workOrder.shared_with" />
           </div>
         </div>
-        <LinkButton :href="route('work-orders.index')" variant="secondary">
+        <LinkButton prefetch :href="route('work-orders.index')" variant="secondary">
           Back to list
         </LinkButton>
       </div>
@@ -91,7 +91,7 @@ const stopTimer = (entryId) => {
 
       <Card title="Entries">
         <div v-if="canEdit" class="mb-4">
-          <LinkButton :href="route('work-orders.entries.create', workOrder.id)" variant="primary" size="sm">
+          <LinkButton prefetch :href="route('work-orders.entries.create', workOrder.id)" variant="primary" size="sm">
             Create new entry
           </LinkButton>
         </div>
@@ -99,7 +99,7 @@ const stopTimer = (entryId) => {
         <div class="space-y-4">
           <div v-for="entry in workOrderEntries.data" :key="entry.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
             <div class="flex items-center gap-4">
-              <LinkButton :href="route('work-orders.entries.show', [workOrder.id, entry.id])" variant="secondary">
+              <LinkButton prefetch :href="route('work-orders.entries.show', [workOrder.id, entry.id])" variant="secondary">
                 {{ entry.name }}
               </LinkButton>
               <LiveTimer v-if="entry.started_at && !entry.ended_at" :started-at="entry.started_at" />

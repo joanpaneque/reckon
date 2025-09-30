@@ -47,7 +47,7 @@ const handleDeleteCancel = () => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-medium text-gray-900">Work orders</h1>
-        <LinkButton :href="route('work-orders.create')" variant="primary">
+        <LinkButton prefetch :href="route('work-orders.create')" variant="primary">
           Create work order
         </LinkButton>
       </div>
@@ -56,7 +56,7 @@ const handleDeleteCancel = () => {
         <div class="space-y-4">
           <div v-for="workOrder in workOrders.data" :key="workOrder.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
             <div class="flex-1">
-              <LinkButton :href="route('work-orders.show', workOrder.id)" variant="secondary">
+              <LinkButton prefetch :href="route('work-orders.show', workOrder.id)" variant="secondary">
                 {{ workOrder.name }}
               </LinkButton>
               <div class="mt-1 flex items-center gap-3">
@@ -65,7 +65,7 @@ const handleDeleteCancel = () => {
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <LinkButton :href="route('work-orders.edit', workOrder.id)" variant="secondary" size="sm">
+              <LinkButton prefetch :href="route('work-orders.edit', workOrder.id)" variant="secondary" size="sm">
                 Edit
               </LinkButton>
               <LinkButton @click="confirmDelete(workOrder.id, workOrder.name)" variant="danger" size="sm">
@@ -95,7 +95,7 @@ const handleDeleteCancel = () => {
           <div class="space-y-4">
             <div v-for="workOrder in sharedWorkOrders.data" :key="workOrder.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
               <div class="flex-1">
-                <LinkButton :href="route('work-orders.show', workOrder.id)" variant="secondary">
+                <LinkButton prefetch :href="route('work-orders.show', workOrder.id)" variant="secondary">
                   {{ workOrder.name }}
                 </LinkButton>
                 <div class="mt-1 flex items-center gap-3">
@@ -113,7 +113,7 @@ const handleDeleteCancel = () => {
             <template v-for="link in sharedWorkOrders.links" :key="link.label">
               <LinkButton
                 v-if="link.url"
-                :href="link.url"
+                prefetch :href="link.url"
                 :variant="link.active ? 'primary' : 'secondary'"
                 size="sm"
                 v-html="link.label"

@@ -39,7 +39,7 @@ const stopTimer = (entryId) => {
           <h1 class="text-2xl font-medium text-gray-900">{{ workOrder.name }}</h1>
           <p class="text-sm text-gray-500 mt-1">Work Order Entries</p>
         </div>
-        <LinkButton :href="route('work-orders.entries.create', workOrder.id)" variant="primary">
+        <LinkButton prefetch :href="route('work-orders.entries.create', workOrder.id)" variant="primary">
           Create new entry
         </LinkButton>
       </div>
@@ -48,7 +48,7 @@ const stopTimer = (entryId) => {
         <div class="space-y-4">
           <div v-for="entry in workOrderEntries.data" :key="entry.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
             <div class="flex items-center gap-4">
-              <LinkButton :href="route('work-orders.entries.show', [workOrder.id, entry.id])" variant="secondary">
+              <LinkButton prefetch :href="route('work-orders.entries.show', [workOrder.id, entry.id])" variant="secondary">
                 {{ entry.name }}
               </LinkButton>
               <LiveTimer v-if="entry.started_at && !entry.ended_at" :started-at="entry.started_at" />
@@ -63,7 +63,7 @@ const stopTimer = (entryId) => {
               >
                 Stop timer
               </LinkButton>
-              <LinkButton :href="route('work-orders.entries.edit', [workOrder.id, entry.id])" variant="secondary" size="sm">
+              <LinkButton prefetch :href="route('work-orders.entries.edit', [workOrder.id, entry.id])" variant="secondary" size="sm">
                 Edit
               </LinkButton>
               <LinkButton :href="route('work-orders.entries.destroy', [workOrder.id, entry.id])" method="delete" variant="danger" size="sm">

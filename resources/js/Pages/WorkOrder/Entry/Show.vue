@@ -39,7 +39,7 @@ const stopTimer = (entryId) => {
           <h1 class="text-2xl font-medium text-gray-900">{{ workOrderEntry.name }}</h1>
           <p class="text-sm text-gray-500 mt-1">{{ workOrder.name }}</p>
         </div>
-        <LinkButton :href="route('work-orders.show', workOrder.id)" variant="secondary">
+        <LinkButton prefetch :href="route('work-orders.show', workOrder.id)" variant="secondary">
           Back to work order
         </LinkButton>
       </div>
@@ -77,7 +77,7 @@ const stopTimer = (entryId) => {
             >
               Stop timer
             </LinkButton>
-            <LinkButton :href="route('work-orders.entries.edit', [workOrder.id, workOrderEntry.id])" variant="secondary" size="sm">
+            <LinkButton prefetch :href="route('work-orders.entries.edit', [workOrder.id, workOrderEntry.id])" variant="secondary" size="sm">
               Edit Entry
             </LinkButton>
           </div>
