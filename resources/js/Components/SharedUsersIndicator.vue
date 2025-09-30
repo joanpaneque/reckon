@@ -24,6 +24,11 @@ const filteredUsers = computed(() => {
   return props.sharedWith;
 });
 
+// Total count includes owner + shared users
+const totalUserCount = computed(() => {
+  return filteredUsers.value.length + 1; // +1 for the owner
+});
+
 const tooltipText = computed(() => {
   const users = filteredUsers.value.slice(0, 3).map(u => u.email).join(', ');
   const ellipsis = filteredUsers.value.length > 3 ? '...' : '';
@@ -38,6 +43,6 @@ const tooltipText = computed(() => {
     :title="tooltipText"
   >
     <Users :size="14" />
-    <span class="text-xs">{{ filteredUsers.length }}</span>
+    <span class="text-xs">{{ totalUserCount }}</span>
   </div>
 </template>

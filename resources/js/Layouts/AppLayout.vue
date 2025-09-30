@@ -4,7 +4,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
-import { Home, ClipboardList, Users } from 'lucide-vue-next';
+import { Home, ClipboardList, Users, Calendar } from 'lucide-vue-next';
 
 defineProps({
   title: {
@@ -68,6 +68,15 @@ const cancelLogout = () => {
         >
           <Users :size="16" />
           Friends
+        </Link>
+        <Link
+           prefetch
+          :href="route('habits.index')"
+          class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
+          :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('habits.*') }"
+        >
+          <Calendar :size="16" />
+          Habits
         </Link>
       </nav>
     </aside>

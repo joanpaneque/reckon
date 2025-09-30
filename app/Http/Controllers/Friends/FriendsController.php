@@ -18,7 +18,7 @@ class FriendsController extends Controller
     {
         $incomingAndFriends = auth()->user()->incomingAndFriends()->paginate(10);
 
-        return Inertia::render('Friends/Index', [
+        return Inertia::render('Friend/Index', [
             'incomingAndFriends' => $incomingAndFriends,
         ]);
     }
@@ -28,7 +28,7 @@ class FriendsController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Friends/Create');
+        return Inertia::render('Friend/Create');
     }
 
     /**
@@ -56,7 +56,7 @@ class FriendsController extends Controller
     public function show(string $id)
     {
         $friendship = Friendship::findOrFail($id);
-        return Inertia::render('Friends/Show', [
+        return Inertia::render('Friend/Show', [
             'friendship' => $friendship,
         ]);
     }
@@ -67,7 +67,7 @@ class FriendsController extends Controller
     public function edit(string $id)
     {
         $friendship = Friendship::findOrFail($id);
-        return Inertia::render('Friends/Edit', [
+        return Inertia::render('Friend/Edit', [
             'friendship' => $friendship,
         ]);
     }

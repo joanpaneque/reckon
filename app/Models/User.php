@@ -41,6 +41,38 @@ class User extends Authenticatable
         return $this->hasMany(WorkOrderEntry::class);
     }
 
+    public function sharedWithMeHabits()
+    {
+        return $this->belongsToMany(
+            Habit::class,
+            'shared_habits',
+            'shared_with_id',
+            'habit_id'
+        )->withPivot('status')->withTimestamps();
+    }
+
+    public function acceptedSharedHabits()
+    {
+        return $this->belongsToMany(
+            Habit::class,
+            'shared_habits',
+            'shared_with_id',
+            'habit_id'
+        )->wherePivot('status', 'accepted')
+        ->withPivot('status')->withTimestamps();
+    }
+
+    public function pendingHabitInvitations()
+    {
+        return $this->belongsToMany(
+            Habit::class,
+            'shared_habits',
+            'shared_with_id',
+            'habit_id'
+        )->wherePivot('status', 'pending')
+        ->withPivot('status')->withTimestamps();
+    }
+
     public function sentFriendships()
     {
         return $this->hasMany(Friendship::class, 'sender_id');
