@@ -46,7 +46,7 @@ const friendName = computed(() => {
       <Card>
         <div class="space-y-6">
           <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Friend Request</h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Friend request</h3>
             <p class="text-gray-600">
               <span class="font-medium">{{ friendName }}</span> wants to be your friend.
             </p>

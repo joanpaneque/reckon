@@ -61,6 +61,13 @@ const submit = () => {
           >
             {{ form.processing ? 'Signing in...' : 'Sign In' }}
           </Button>
+
+          <div class="text-center text-sm text-gray-600">
+            Don't have an account?
+            <a :href="route('register')" class="text-gray-900 font-medium hover:underline">
+              Create one
+            </a>
+          </div>
         </form>
       </Card>
     </div>
