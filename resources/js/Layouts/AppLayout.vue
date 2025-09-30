@@ -35,13 +35,15 @@ const cancelLogout = () => {
     <!-- Sidebar -->
     <aside class="w-48 border-r border-gray-200">
       <div class="px-4 py-4 border-b border-gray-200 h-16 flex items-center">
-        <Link :href="route('index')" class="text-lg font-medium text-gray-900">
+        <Link
+           prefetch :href="route('index')" class="text-lg font-medium text-gray-900">
           Reckon
         </Link>
       </div>
 
       <nav>
         <Link
+           prefetch
           :href="route('index')"
           class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
           :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('index') }"
@@ -50,6 +52,7 @@ const cancelLogout = () => {
           Home
         </Link>
         <Link
+           prefetch
           :href="route('work-orders.index')"
           class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
           :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('work-orders.*') }"
@@ -58,6 +61,7 @@ const cancelLogout = () => {
           Work orders
         </Link>
         <Link
+           prefetch
           :href="route('friends.index')"
           class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
           :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('friends.*') }"
