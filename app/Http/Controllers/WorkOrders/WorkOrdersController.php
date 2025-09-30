@@ -15,7 +15,7 @@ class WorkOrdersController extends Controller
      */
     public function index()
     {
-        $workOrders = WorkOrder::orderBy('created_at', 'desc')->paginate(10);
+        $workOrders = WorkOrder::where('user_id', auth()->user()->id)->orderBy('created_at', 'desc')->paginate(10);
 
         // Add time and cost calculations to each work order
         $workOrders->getCollection()->transform(function ($workOrder) {
@@ -48,7 +48,7 @@ class WorkOrdersController extends Controller
             'hour_price' => ['required', 'numeric', 'min:0'],
         ]);
 
-        $workOrder = WorkOrder::create($validated);
+        $workOrder = WorkOrder::create([...$validated, 'user_id' => auth()->user()->id]);
 
         return redirect()->route('work-orders.index');
     }
@@ -58,7 +58,7 @@ class WorkOrdersController extends Controller
      */
     public function show(string $id)
     {
-        $workOrder = WorkOrder::findOrFail($id);
+        $workOrder = WorkOrder::where('user_id', auth()->user()->id)->findOrFail($id);
         $workOrderEntries = $workOrder->entries()->orderBy('created_at', 'desc')->paginate(10);
 
         // Use the model method for consistency
@@ -94,7 +94,7 @@ class WorkOrdersController extends Controller
             'hour_price' => ['required', 'numeric', 'min:0'],
         ]);
 
-        $workOrder = WorkOrder::findOrFail($id);
+        $workOrder = WorkOrder::where('user_id', auth()->user()->id)->findOrFail($id);
         $workOrder->update($validated);
 
         return redirect()->route('work-orders.index');
@@ -105,7 +105,7 @@ class WorkOrdersController extends Controller
      */
     public function destroy(string $id)
     {
-        $workOrder = WorkOrder::findOrFail($id);
+        $workOrder = WorkOrder::where('user_id', auth()->user()->id)->findOrFail($id);
         $workOrder->delete();
 
         return redirect()->route('work-orders.index');
