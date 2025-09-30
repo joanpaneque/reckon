@@ -81,7 +81,7 @@ const submit = () => {
 
           <div class="flex justify-end">
             <Button type="submit" :disabled="form.processing">
-              {{ startNow ? 'Start entry' : 'create Entry' }}
+              {{ startNow ? 'Start entry' : 'Create Entry' }}
             </Button>
           </div>
         </form>
