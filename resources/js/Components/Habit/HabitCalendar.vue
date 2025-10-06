@@ -93,20 +93,20 @@ const isHabitActiveOnDate = (habit, date) => {
   const habitStart = new Date(habit.start_date);
   const habitEnd = new Date(habit.end_date);
   const checkDate = new Date(date);
-  
+
   // Normalize dates to compare only date part (ignore time)
   habitStart.setHours(0, 0, 0, 0);
   habitEnd.setHours(0, 0, 0, 0);
   checkDate.setHours(0, 0, 0, 0);
-  
+
   // Check if date is within habit range
   if (checkDate < habitStart || checkDate > habitEnd) {
     return false;
   }
-  
+
   // Check frequency
   const dayOfWeek = checkDate.getDay(); // 0 = Sunday, 6 = Saturday
-  
+
   if (habit.frequency === 'everyday') {
     return true;
   } else if (habit.frequency === 'weekdays') {
@@ -114,7 +114,7 @@ const isHabitActiveOnDate = (habit, date) => {
   } else if (habit.frequency === 'weekends') {
     return dayOfWeek === 0 || dayOfWeek === 6; // Saturday or Sunday
   }
-  
+
   return false;
 };
 
@@ -132,7 +132,7 @@ const dayViewHabits = computed(() => {
 const weekDays = computed(() => {
   const startOfWeek = getStartOfWeek(currentDate.value);
   const days = [];
-  
+
   for (let i = 0; i < 7; i++) {
     const date = new Date(startOfWeek);
     date.setDate(date.getDate() + i);
@@ -144,7 +144,7 @@ const weekDays = computed(() => {
       habits: getHabitsForDate(date),
     });
   }
-  
+
   return days;
 });
 
@@ -155,22 +155,22 @@ const monthDays = computed(() => {
   const startOfMonth = new Date(year, month, 1);
   const firstDayOfWeek = startOfMonth.getDay();
   const startDay = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1; // Monday = 0
-  
+
   // Calculate the start date (may be from previous month)
   const startDate = new Date(startOfMonth);
   startDate.setDate(startDate.getDate() - startDay);
-  
+
   const days = [];
-  
+
   // Generate 42 days (6 weeks × 7 days) to fill the complete calendar grid
   for (let i = 0; i < 42; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
-    
+
     const isCurrentMonth = date.getMonth() === month;
     const isPreviousMonth = date.getMonth() === (month === 0 ? 11 : month - 1);
     const isNextMonth = date.getMonth() === (month === 11 ? 0 : month + 1);
-    
+
     days.push({
       date: date,
       dayNumber: date.getDate(),
@@ -181,7 +181,7 @@ const monthDays = computed(() => {
       habits: getHabitsForDate(date),
     });
   }
-  
+
   return days;
 });
 
@@ -203,10 +203,10 @@ const getContrastColor = (hexColor) => {
   const r = parseInt(hexColor.slice(1, 3), 16);
   const g = parseInt(hexColor.slice(3, 5), 16);
   const b = parseInt(hexColor.slice(5, 7), 16);
-  
+
   // Calculate relative luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  
+
   // Return black or white based on luminance
   return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
@@ -215,11 +215,11 @@ const getContrastColor = (hexColor) => {
 const getHabitCompletionStatus = (habit, date) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const checkDate = new Date(date);
   checkDate.setHours(0, 0, 0, 0);
-  
-  
+
+
   // Check if there's a completion record for this date
   const completion = habit.user_habits?.find(uh => {
     if (!uh.completed_at) return false;
@@ -227,22 +227,22 @@ const getHabitCompletionStatus = (habit, date) => {
     completedDate.setHours(0, 0, 0, 0);
     return completedDate.getTime() === checkDate.getTime();
   });
-  
+
   // If there's a completion record and it's marked as completed
   if (completion && completion.completed) {
     return 'completed'; // Verde
   }
-  
+
   // If it's today and not completed (or no record exists)
   if (checkDate.getTime() === today.getTime()) {
     return 'today'; // Amarillo
   }
-  
+
   // If it's a past date and not completed (or no record exists)
   if (checkDate < today) {
     return 'missed'; // Rojo
   }
-  
+
   // Future dates
   return 'future'; // Gris
 };
@@ -262,10 +262,10 @@ const getStatusBarColor = (status) => {
 const getUserHabitCompletionStatus = (habit, userId, date) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const checkDate = new Date(date);
   checkDate.setHours(0, 0, 0, 0);
-  
+
   // Always use all_user_habits as the single source of truth
   // This ensures each user's completion status is independent
   const completion = habit.all_user_habits?.find(uh => {
@@ -274,22 +274,22 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
     completedDate.setHours(0, 0, 0, 0);
     return completedDate.getTime() === checkDate.getTime();
   });
-  
+
   // If there's a completion record and it's marked as completed
   if (completion && completion.completed) {
     return 'completed'; // Verde
   }
-  
+
   // If it's today and not completed (or no record exists)
   if (checkDate.getTime() === today.getTime()) {
     return 'today'; // Amarillo
   }
-  
+
   // If it's a past date and not completed (or no record exists)
   if (checkDate < today) {
     return 'missed'; // Rojo
   }
-  
+
   // Future dates
   return 'future'; // Gris
 };
@@ -299,7 +299,7 @@ const getSharedUserTagStyle = (habit, userId, date) => {
   const status = getUserHabitCompletionStatus(habit, userId, date);
   const backgroundColor = getStatusBarColor(status);
   const textColor = getContrastColor(backgroundColor);
-  
+
   return {
     backgroundColor,
     color: textColor,
@@ -310,7 +310,7 @@ const getSharedUserTagStyle = (habit, userId, date) => {
 const getStatusIcon = (status) => {
   const icons = {
     completed: Check,   // ✓ Verde
-    today: Clock,       // ⏰ Amarillo  
+    today: Clock,       // ⏰ Amarillo
     missed: X,          // ✗ Rojo
     future: Calendar,   // 📅 Gris
   };
@@ -320,12 +320,12 @@ const getStatusIcon = (status) => {
 // Get all users for a habit (owner + shared users, no duplicates)
 const getAllHabitUsers = (habit) => {
   const users = [];
-  
+
   // 1. Always add the owner first (now we have habit.user from backend)
   if (habit.user) {
     users.push(habit.user);
   }
-  
+
   // 2. Add shared users, but avoid duplicates with owner
   if (habit.shared_with && habit.shared_with.length > 0) {
     habit.shared_with.forEach(sharedUser => {
@@ -335,7 +335,7 @@ const getAllHabitUsers = (habit) => {
       }
     });
   }
-  
+
   return users;
 };
 
@@ -352,7 +352,7 @@ const isToday = (date) => {
 const isHabitCompleted = (habit, date) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
-  
+
   // Use the same logic as getUserHabitCompletionStatus but return boolean
   const status = getUserHabitCompletionStatus(habit, currentUserId, date);
   return status === 'completed';
@@ -362,7 +362,7 @@ const isHabitCompleted = (habit, date) => {
 const handleHabitToggle = (habit, date, completed) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
-  
+
   router.post(route('habits.completion', habit.id), {
     completed: completed,
     date: date.toISOString().split('T')[0], // Format as YYYY-MM-DD
@@ -373,7 +373,7 @@ const handleHabitToggle = (habit, date, completed) => {
       // Update both user_habits and all_user_habits for immediate UI feedback
       const checkDate = new Date(date);
       checkDate.setHours(0, 0, 0, 0);
-      
+
       // Initialize arrays if they don't exist
       if (!habit.user_habits) {
         habit.user_habits = [];
@@ -381,7 +381,7 @@ const handleHabitToggle = (habit, date, completed) => {
       if (!habit.all_user_habits) {
         habit.all_user_habits = [];
       }
-      
+
       // Update user_habits (current user only)
       const existingUserHabitIndex = habit.user_habits.findIndex(uh => {
         if (!uh.completed_at) return false;
@@ -389,7 +389,7 @@ const handleHabitToggle = (habit, date, completed) => {
         completedDate.setHours(0, 0, 0, 0);
         return completedDate.getTime() === checkDate.getTime();
       });
-      
+
       // Update all_user_habits (all users)
       const existingAllUserHabitIndex = habit.all_user_habits.findIndex(uh => {
         if (uh.user_id !== currentUserId || !uh.completed_at) return false;
@@ -397,7 +397,7 @@ const handleHabitToggle = (habit, date, completed) => {
         completedDate.setHours(0, 0, 0, 0);
         return completedDate.getTime() === checkDate.getTime();
       });
-      
+
       const newRecord = {
         user_id: currentUserId,
         habit_id: habit.id,
@@ -405,14 +405,14 @@ const handleHabitToggle = (habit, date, completed) => {
         completed_at: completed ? date.toISOString() : null,
         user: page.props.auth.user // Include user info for consistency
       };
-      
+
       // Update user_habits
       if (existingUserHabitIndex >= 0) {
         habit.user_habits[existingUserHabitIndex] = { ...newRecord };
       } else if (completed) {
         habit.user_habits.push({ ...newRecord });
       }
-      
+
       // Update all_user_habits
       if (existingAllUserHabitIndex >= 0) {
         habit.all_user_habits[existingAllUserHabitIndex] = { ...newRecord };
@@ -445,7 +445,7 @@ const hasIncompleteHabitsToday = computed(() => {
   if (viewMode.value !== 'day' || !isToday(currentDate.value)) {
     return false;
   }
-  
+
   const todayHabits = getHabitsForDate(currentDate.value);
   return todayHabits.some(habit => !isHabitCompleted(habit, currentDate.value));
 });
@@ -455,21 +455,21 @@ const timeRemainingToday = computed(() => {
   if (!hasIncompleteHabitsToday.value) {
     return null;
   }
-  
+
   const now = currentTime.value;
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
-  
+
   const diff = endOfDay.getTime() - now.getTime();
-  
+
   if (diff <= 0) {
     return { hours: 0, minutes: 0, seconds: 0 };
   }
-  
+
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  
+
   return { hours, minutes, seconds };
 });
 
@@ -477,9 +477,9 @@ const timeRemainingToday = computed(() => {
 const formatCountdown = computed(() => {
   const time = timeRemainingToday.value;
   if (!time) return '';
-  
+
   const { hours, minutes, seconds } = time;
-  
+
   if (hours > 0) {
     return `${hours}h ${minutes}m ${seconds}s`;
   } else if (minutes > 0) {
@@ -500,40 +500,40 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-3 md:space-y-4">
     <!-- Header with view controls -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      <div class="flex items-center gap-1 md:gap-2">
         <button
           @click="goToPrevious"
-          class="p-2 hover:bg-gray-100 transition-colors"
+          class="p-1.5 md:p-2 hover:bg-gray-100 transition-colors flex-shrink-0"
         >
           <ChevronLeft :size="20" />
         </button>
-        <h2 class="text-lg font-medium text-gray-900 min-w-[280px] text-center">
+        <h2 class="text-sm md:text-lg font-medium text-gray-900 text-center flex-1 md:min-w-[280px]">
           {{ formatDateHeader }}
         </h2>
         <button
           @click="goToNext"
-          class="p-2 hover:bg-gray-100 transition-colors"
+          class="p-1.5 md:p-2 hover:bg-gray-100 transition-colors flex-shrink-0"
         >
           <ChevronRight :size="20" />
         </button>
         <button
           @click="goToToday"
-          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+          class="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors flex-shrink-0"
         >
           Today
         </button>
       </div>
-      
+
       <div class="flex gap-1">
         <button
           v-for="mode in viewModes"
           :key="mode.value"
           @click="viewMode = mode.value"
           :class="[
-            'px-3 py-1.5 text-sm font-medium transition-colors',
+            'flex-1 md:flex-none px-3 py-1.5 text-xs md:text-sm font-medium transition-colors',
             viewMode === mode.value
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -546,17 +546,17 @@ onUnmounted(() => {
 
     <!-- Day View -->
     <div v-if="viewMode === 'day'" class="border border-gray-200">
-      <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h3 class="font-medium text-gray-900">Habits for this day</h3>
+      <div class="bg-gray-50 px-3 md:px-4 py-2 md:py-3 border-b border-gray-200">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <h3 class="text-sm md:text-base font-medium text-gray-900">Habits for this day</h3>
           <!-- Countdown timer for incomplete habits -->
-          <div v-if="hasIncompleteHabitsToday" class="text-sm text-orange-600 font-medium">
+          <div v-if="hasIncompleteHabitsToday" class="text-xs md:text-sm text-orange-600 font-medium">
             You have <span class="font-mono font-bold text-orange-800">{{ formatCountdown }}</span> to complete your daily habits
           </div>
         </div>
       </div>
-      <div class="p-4">
-        <div v-if="dayViewHabits.length === 0" class="text-center py-8 text-gray-500">
+      <div class="p-2 md:p-4">
+        <div v-if="dayViewHabits.length === 0" class="text-center py-8 text-gray-500 text-sm">
           No habits scheduled for this day
         </div>
         <div v-else style="display: flex; flex-direction: column; gap: 1px;">
@@ -565,33 +565,33 @@ onUnmounted(() => {
             :key="habit.id"
             class="flex items-stretch border border-gray-200 hover:border-gray-300 transition-colors"
           >
-            <div class="flex-1 p-3">
-              <div class="flex items-center gap-3">
-                <!-- Checkbox only for today -->
+            <div class="flex-1 p-2 md:p-3">
+              <div class="flex items-center gap-2 md:gap-3">
+                <!-- Checkbox only for today - larger on mobile -->
                 <div v-if="isToday(currentDate)" class="flex-shrink-0">
                   <input
                     type="checkbox"
                     :checked="isHabitCompleted(habit, currentDate)"
                     @change="handleHabitToggle(habit, currentDate, $event.target.checked)"
-                    class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    class="w-6 h-6 md:w-5 md:h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
                   />
                 </div>
-                <div class="flex-1">
-                  <LinkButton prefetch :href="route('habits.show', habit.id)" variant="secondary">
+                <div class="flex-1 min-w-0">
+                  <LinkButton prefetch :href="route('habits.show', habit.id)" variant="secondary" size="sm" class="text-sm md:text-base">
                     {{ habit.name }}
                   </LinkButton>
-                  <div class="mt-1 flex items-center gap-2">
-                    <span 
+                  <div class="mt-1 flex items-center gap-1.5 md:gap-2 flex-wrap">
+                    <span
                       :style="getHabitStyle(habit)"
-                      class="px-2 py-0.5 text-xs font-medium rounded-full"
+                      class="px-1.5 md:px-2 py-0.5 text-xs font-medium rounded-full"
                     >
                       {{ habit.frequency }}
                     </span>
                     <!-- Shared users indicator (total count) -->
-                    <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" />
-                    
-                    <!-- User tags with completion status (only if shared with someone) -->
-                    <div v-if="habit.shared_with && habit.shared_with.length > 0" class="flex items-center gap-1 flex-wrap">
+                    <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" class="hidden md:flex" />
+
+                    <!-- User tags with completion status (only if shared with someone) - hidden on mobile -->
+                    <div v-if="habit.shared_with && habit.shared_with.length > 0" class="hidden md:flex items-center gap-1 flex-wrap">
                       <span
                         v-for="user in getAllHabitUsers(habit)"
                         :key="user.id"
@@ -599,9 +599,9 @@ onUnmounted(() => {
                         class="px-2 py-0.5 text-xs font-medium rounded-full flex items-center gap-1"
                         :title="`${user.name} (${user.email})`"
                       >
-                        <component 
-                          :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))" 
-                          :size="12" 
+                        <component
+                          :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))"
+                          :size="12"
                         />
                         {{ user.name }}
                       </span>
@@ -610,22 +610,28 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
-            <!-- Status indicator on the right -->
-            <div 
-              :style="{ 
-                backgroundColor: getStatusBarColor(getHabitCompletionStatus(habit, currentDate)),
-                width: '45px',
-                borderLeft: '2px solid white'
-              }"
-            />
+            <!-- Status indicator on the right - grid for multiple users -->
+            <div
+              class="flex flex-col w-[30px] md:w-[45px] border-l-2 border-white"
+            >
+              <div
+                v-for="user in getAllHabitUsers(habit)"
+                :key="user.id"
+                :style="{
+                  backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, currentDate)),
+                  flex: 1
+                }"
+                :title="`${user.name}: ${getUserHabitCompletionStatus(habit, user.id, currentDate)}`"
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Week View -->
-    <div v-if="viewMode === 'week'" class="w-full">
-      <div class="border border-gray-200">
+    <div v-if="viewMode === 'week'" class="w-full overflow-x-auto">
+      <div class="border border-gray-200 min-w-[640px]">
         <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));">
           <div
             v-for="day in weekDays"
@@ -635,22 +641,22 @@ onUnmounted(() => {
           >
             <div
               :class="[
-                'px-2 py-2 text-center border-b border-gray-200',
+                'px-1 md:px-2 py-1.5 md:py-2 text-center border-b border-gray-200',
                 day.isToday ? 'bg-blue-50' : 'bg-gray-50'
               ]"
             >
               <div class="text-xs font-medium text-gray-600">{{ day.dayName }}</div>
               <div
                 :class="[
-                  'text-lg font-semibold',
+                  'text-base md:text-lg font-semibold',
                   day.isToday ? 'text-blue-600' : 'text-gray-900'
                 ]"
               >
                 {{ day.dayNumber }}
               </div>
             </div>
-            <div class="p-2 min-h-[120px]">
-              <div v-if="day.habits.length === 0" class="text-xs text-gray-400 text-center mt-4">
+            <div class="p-1 md:p-2 min-h-[100px] md:min-h-[120px]">
+              <div v-if="day.habits.length === 0" class="text-xs text-gray-400 text-center mt-2 md:mt-4">
                 No habits
               </div>
               <div v-else style="display: flex; flex-direction: column; gap: 1px;">
@@ -660,18 +666,22 @@ onUnmounted(() => {
                 class="text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity flex items-stretch"
                 @click="$inertia.visit(route('habits.show', habit.id))"
               >
-                <div class="flex-1 px-2 py-1 flex items-center gap-1" :style="getHabitStyle(habit)">
-                  <span class="flex-1">{{ habit.name }}</span>
-                  <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" />
+                <div class="flex-1 px-1.5 md:px-2 py-1 flex items-center gap-1" :style="getHabitStyle(habit)">
+                  <span class="flex-1 truncate">{{ habit.name }}</span>
+                  <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" class="hidden md:flex" />
                 </div>
-                <!-- Status indicator on the right -->
-                <div 
-                  :style="{ 
-                    backgroundColor: getStatusBarColor(getHabitCompletionStatus(habit, day.date)),
-                    width: '20px',
-                    borderLeft: '1px solid white'
-                  }"
-                />
+                <!-- Status indicator on the right - grid for multiple users -->
+                <div class="flex flex-col w-[15px] md:w-[20px] border-l border-white">
+                  <div
+                    v-for="user in getAllHabitUsers(habit)"
+                    :key="user.id"
+                    :style="{
+                      backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, day.date)),
+                      flex: 1
+                    }"
+                    :title="`${user.name}: ${getUserHabitCompletionStatus(habit, user.id, day.date)}`"
+                  />
+                </div>
               </div>
               </div>
             </div>
@@ -681,68 +691,74 @@ onUnmounted(() => {
     </div>
 
     <!-- Month View -->
-    <div v-if="viewMode === 'month'" class="border border-gray-200">
-      <!-- Day headers -->
-      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="bg-gray-50 border-b border-gray-200">
-        <div v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :key="day" class="px-2 py-2 text-center text-xs font-medium text-gray-600 border-r border-gray-200 last:border-r-0">
-          {{ day }}
+    <div v-if="viewMode === 'month'" class="w-full overflow-x-auto">
+      <div class="border border-gray-200 min-w-[640px]">
+        <!-- Day headers -->
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="bg-gray-50 border-b border-gray-200">
+          <div v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :key="day" class="px-1 md:px-2 py-1.5 md:py-2 text-center text-xs font-medium text-gray-600 border-r border-gray-200 last:border-r-0">
+            <span class="hidden md:inline">{{ day }}</span>
+            <span class="md:hidden">{{ day.charAt(0) }}</span>
+          </div>
         </div>
-      </div>
-      
-      <!-- Calendar grid - 7 columns x 6 rows (42 days) -->
-      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(100px, auto));">
-        <div
-          v-for="(day, index) in monthDays"
-          :key="index"
-          :class="[
-            'border-r border-b border-gray-200 last:border-r-0 p-2 relative',
-            !day.isCurrentMonth ? 'bg-gray-50' : '',
-            day.isToday ? 'bg-blue-50' : '',
-            day.isPreviousMonth || day.isNextMonth ? 'text-gray-400' : ''
-          ]"
-          style="min-height: 100px;"
-        >
-          <div>
-            <div
-              :class="[
-                'text-sm font-semibold mb-1',
-                day.isToday ? 'text-blue-600' : day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
-              ]"
-            >
-              {{ day.dayNumber }}
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 1px;">
+
+        <!-- Calendar grid - 7 columns x 6 rows (42 days) -->
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(80px, auto));">
+          <div
+            v-for="(day, index) in monthDays"
+            :key="index"
+            :class="[
+              'border-r border-b border-gray-200 last:border-r-0 p-1 md:p-2 relative',
+              !day.isCurrentMonth ? 'bg-gray-50' : '',
+              day.isToday ? 'bg-blue-50' : '',
+              day.isPreviousMonth || day.isNextMonth ? 'text-gray-400' : ''
+            ]"
+            style="min-height: 80px;"
+          >
+            <div>
               <div
-                v-for="habit in day.habits.slice(0, 2)"
-                :key="habit.id"
                 :class="[
-                  'text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity truncate flex items-stretch',
-                  !day.isCurrentMonth ? 'opacity-50' : ''
+                  'text-xs md:text-sm font-semibold mb-0.5 md:mb-1',
+                  day.isToday ? 'text-blue-600' : day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
                 ]"
-                @click="$inertia.visit(route('habits.show', habit.id))"
               >
-                <div class="flex-1 px-1.5 py-0.5 truncate flex items-center gap-1" :style="getHabitStyle(habit)">
-                  <span class="flex-1 truncate">{{ habit.name }}</span>
-                  <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" />
-                </div>
-                <!-- Status indicator on the right -->
-                <div 
-                  class="flex-shrink-0"
-                  :style="{ 
-                    backgroundColor: getStatusBarColor(getHabitCompletionStatus(habit, day.date)),
-                    width: '15px',
-                    borderLeft: '1px solid white'
-                  }"
-                />
+                {{ day.dayNumber }}
               </div>
-              <div
-                v-if="day.habits.length > 2"
-                :class="[
-                  'px-1.5 py-0.5 text-xs cursor-pointer hover:text-gray-700 truncate',
-                  day.isCurrentMonth ? 'text-gray-500' : 'text-gray-400'
-                ]"
-              >
-                +{{ day.habits.length - 2 }} more
+              <div style="display: flex; flex-direction: column; gap: 1px;">
+                <div
+                  v-for="habit in day.habits.slice(0, 2)"
+                  :key="habit.id"
+                  :class="[
+                    'text-xs font-medium rounded cursor-pointer hover:opacity-80 transition-opacity truncate flex items-stretch',
+                    !day.isCurrentMonth ? 'opacity-50' : ''
+                  ]"
+                  @click="$inertia.visit(route('habits.show', habit.id))"
+                >
+                  <div class="flex-1 px-1 md:px-1.5 py-0.5 truncate flex items-center gap-1" :style="getHabitStyle(habit)">
+                    <span class="flex-1 truncate">{{ habit.name }}</span>
+                    <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" class="hidden md:flex" />
+                  </div>
+                  <!-- Status indicator on the right - grid for multiple users -->
+                  <div class="flex flex-col w-[12px] flex-shrink-0 border-l border-white">
+                    <div
+                      v-for="user in getAllHabitUsers(habit)"
+                      :key="user.id"
+                      :style="{
+                        backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, day.date)),
+                        flex: 1
+                      }"
+                      :title="`${user.name}: ${getUserHabitCompletionStatus(habit, user.id, day.date)}`"
+                    />
+                  </div>
+                </div>
+                <div
+                  v-if="day.habits.length > 2"
+                  :class="[
+                    'px-1 md:px-1.5 py-0.5 text-xs cursor-pointer hover:text-gray-700 truncate',
+                    day.isCurrentMonth ? 'text-gray-500' : 'text-gray-400'
+                  ]"
+                >
+                  +{{ day.habits.length - 2 }}
+                </div>
               </div>
             </div>
           </div>

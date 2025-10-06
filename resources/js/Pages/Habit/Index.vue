@@ -59,15 +59,18 @@ const getContrastColor = (hexColor) => {
 
 <template>
   <AppLayout title="Habits">
-    <div class="space-y-6">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-medium text-gray-900">Habits</h1>
-        <div class="flex gap-3">
-          <LinkButton prefetch :href="route('shared-habits.index')" variant="secondary">
-            Shared Habits
+    <div class="space-y-4 md:space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h1 class="text-xl md:text-2xl font-medium text-gray-900">Habits</h1>
+        <div class="flex gap-2 md:gap-3">
+          <LinkButton prefetch :href="route('shared-habits.index')" variant="secondary" size="sm" class="flex-1 md:flex-none">
+            <span class="md:hidden">Shared</span>
+            <span class="hidden md:inline">Shared Habits</span>
           </LinkButton>
-          <LinkButton prefetch :href="route('habits.create')" variant="primary">
-            Create habit
+          <LinkButton prefetch :href="route('habits.create')" variant="primary" size="sm" class="flex-1 md:flex-none">
+            <span class="md:hidden">Create</span>
+            <span class="hidden md:inline">Create habit</span>
           </LinkButton>
         </div>
       </div>
@@ -77,8 +80,8 @@ const getContrastColor = (hexColor) => {
         <HabitCalendar :habits="habits" />
       </Card>
 
-      <!-- List View -->
-      <Card title="All Habits">
+      <!-- List View - Only show on desktop -->
+      <Card title="All Habits" class="hidden md:block">
         <div v-if="habits.length === 0" class="text-center py-8 text-gray-500">
           No habits found. Create your first habit to get started!
         </div>
@@ -89,7 +92,7 @@ const getContrastColor = (hexColor) => {
                 {{ habit.name }}
               </LinkButton>
               <div class="mt-1 flex items-center gap-3">
-                <span 
+                <span
                   :style="getHabitStyle(habit)"
                   class="px-2 py-1 text-xs font-medium rounded-full"
                 >

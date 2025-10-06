@@ -50,3 +50,4 @@ const formattedCost = computed(() => {
     </div>
   </div>
 </template>
+
