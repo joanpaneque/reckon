@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\User;
 use App\Models\Friendship;
+use App\Models\Motivation;
 
 
 class FriendsController extends Controller
@@ -55,9 +56,33 @@ class FriendsController extends Controller
      */
     public function show(string $id)
     {
-        $friendship = Friendship::findOrFail($id);
+        $friendship = Friendship::with(['sender', 'receiver'])->findOrFail($id);
+        
+        // Determine who is the friend (the other person in the friendship)
+        $currentUserId = auth()->id();
+        $friendId = $friendship->sender_id === $currentUserId 
+            ? $friendship->receiver_id 
+            : $friendship->sender_id;
+        
+        // Get motivations received from this friend
+        $motivationsReceived = Motivation::where('user_id', $friendId)
+            ->where('sent_to', $currentUserId)
+            ->with('sender')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get motivations sent to this friend
+        $motivationsSent = Motivation::where('user_id', $currentUserId)
+            ->where('sent_to', $friendId)
+            ->with('receiver')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
         return Inertia::render('Friend/Show', [
             'friendship' => $friendship,
+            'motivationsReceived' => $motivationsReceived,
+            'motivationsSent' => $motivationsSent,
+            'friendId' => $friendId,
         ]);
     }
 

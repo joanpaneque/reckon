@@ -11,6 +11,9 @@ class UserHabit extends Model
         'habit_id',
         'completed',
         'completed_at',
+        'media_path',
+        'media_type',
+        'media_caption',
     ];
 
     protected $casts = [

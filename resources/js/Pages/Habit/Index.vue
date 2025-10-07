@@ -5,6 +5,7 @@ import LinkButton from '@/Components/LinkButton.vue';
 import Modal from '@/Components/Modal.vue';
 import HabitCalendar from '@/Components/Habit/HabitCalendar.vue';
 import SharedUsersIndicator from '@/Components/SharedUsersIndicator.vue';
+import MotivationReceivePopup from '@/Components/Habit/MotivationReceivePopup.vue';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -132,5 +133,8 @@ const getContrastColor = (hexColor) => {
       @cancel="handleDeleteCancel"
       @close="showDeleteModal = false"
     />
+
+    <!-- Motivation Receive Popup -->
+    <MotivationReceivePopup />
   </AppLayout>
 </template>

@@ -2,7 +2,10 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import LinkButton from '@/Components/LinkButton.vue';
 import SharedUsersIndicator from '@/Components/SharedUsersIndicator.vue';
-import { ChevronLeft, ChevronRight, Check, Clock, X, Calendar } from 'lucide-vue-next';
+import HabitMediaModal from '@/Components/Habit/HabitMediaModal.vue';
+import HabitMediaViewer from '@/Components/Habit/HabitMediaViewer.vue';
+import MotivationSendModal from '@/Components/Habit/MotivationSendModal.vue';
+import { ChevronLeft, ChevronRight, Check, Clock, X, Calendar, ChevronDown, ChevronUp, Upload, Trash2, Heart } from 'lucide-vue-next';
 import { router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 
@@ -20,6 +23,20 @@ const currentDate = ref(new Date());
 // Countdown timer state
 const currentTime = ref(new Date());
 let countdownInterval = null;
+
+// State to track which habits have expanded users list
+const expandedHabits = ref({});
+
+// Media upload state
+const showMediaModal = ref(false);
+const selectedMediaFile = ref(null);
+const mediaPreview = ref(null);
+const mediaType = ref(null);
+const selectedUserHabitId = ref(null);
+
+// Motivation state
+const showMotivationModal = ref(false);
+const selectedMotivationUser = ref(null);
 
 // View mode buttons
 const viewModes = [
@@ -359,39 +376,24 @@ const getAllHabitUsers = (habit, date) => {
   const checkDate = new Date(date);
   checkDate.setHours(0, 0, 0, 0);
 
-  console.log('=== getAllHabitUsers ===');
-  console.log('Habit:', habit.name);
-  console.log('Check date:', checkDate.toLocaleDateString());
-  console.log('Shared with:', habit.shared_with);
-
   // 1. Always add the owner first (now we have habit.user from backend)
   if (habit.user) {
     users.push(habit.user);
-    console.log('Added owner:', habit.user.name);
   }
 
   // 2. Add shared users, but only if they had joined by the given date
   if (habit.shared_with && habit.shared_with.length > 0) {
     habit.shared_with.forEach(sharedUser => {
-      console.log('Processing shared user:', sharedUser.name, 'joined_at:', sharedUser.joined_at);
-
       // Check if user had joined by this date
       if (sharedUser.joined_at) {
         const joinedDate = new Date(sharedUser.joined_at);
         joinedDate.setHours(0, 0, 0, 0);
 
-        console.log('  Joined date:', joinedDate.toLocaleDateString());
-        console.log('  Check date >= joined date?', checkDate >= joinedDate);
-
         // Only add if user joined on or before the check date, and not already in list (avoid duplicates with owner)
         if (checkDate >= joinedDate && !users.some(u => u.id === sharedUser.id)) {
           users.push(sharedUser);
-          console.log('  ✓ Added user:', sharedUser.name);
-        } else {
-          console.log('  ✗ Not added - date condition not met');
         }
       } else {
-        console.log('  No joined_at - adding anyway');
         // If no joined_at, add them (backwards compatibility or owner shared)
         if (!users.some(u => u.id === sharedUser.id)) {
           users.push(sharedUser);
@@ -399,9 +401,6 @@ const getAllHabitUsers = (habit, date) => {
       }
     });
   }
-
-  console.log('Final users:', users.map(u => u.name));
-  console.log('========================');
 
   return users;
 };
@@ -425,6 +424,167 @@ const isHabitCompleted = (habit, date) => {
   return status === 'completed';
 };
 
+// Toggle expanded state for habit users
+const toggleHabitUsers = (habitId) => {
+  expandedHabits.value[habitId] = !expandedHabits.value[habitId];
+};
+
+// Check if habit has media for today
+const hasMediaForToday = (habit, date) => {
+  const page = usePage();
+  const currentUserId = page.props.auth.user.id;
+
+  // Normalize the date to YYYY-MM-DD format
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+  const checkDateStr = checkDate.toISOString().split('T')[0];
+
+  const userHabit = habit.all_user_habits?.find(uh => {
+    if (!uh) return false;
+    if (uh.user_id !== currentUserId) return false;
+    if (!uh.completed) return false;
+    if (!uh.completed_at) return false;
+
+    // Compare dates (normalized to YYYY-MM-DD)
+    const completedDateStr = uh.completed_at.split('T')[0];
+    return completedDateStr === checkDateStr;
+  });
+
+  return userHabit && userHabit.media_path;
+};
+
+// Handle media deletion
+const handleDeleteMedia = (habit, date) => {
+  if (!confirm('Are you sure you want to delete this media?')) {
+    return;
+  }
+
+  const page = usePage();
+  const currentUserId = page.props.auth.user.id;
+
+  // Normalize the date to YYYY-MM-DD format
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+  const checkDateStr = checkDate.toISOString().split('T')[0];
+
+  const userHabit = habit.all_user_habits?.find(uh => {
+    if (!uh) return false;
+    if (uh.user_id !== currentUserId) return false;
+    if (!uh.completed) return false;
+    if (!uh.completed_at) return false;
+
+    // Compare dates (normalized to YYYY-MM-DD)
+    const completedDateStr = uh.completed_at.split('T')[0];
+    return completedDateStr === checkDateStr;
+  });
+
+  if (!userHabit || !userHabit.id) {
+    alert('Error: Could not find habit completion. Please refresh the page and try again.');
+    return;
+  }
+
+  // Send delete request
+  router.delete(route('habits.media.delete', userHabit.id), {
+    preserveScroll: true,
+    onSuccess: () => {
+      router.reload({ only: ['habits'] });
+    },
+    onError: () => {
+      alert('Error deleting media. Please try again.');
+    }
+  });
+};
+
+// Handle media file selection
+const handleMediaFileSelect = (event, habit, date) => {
+  const file = event.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  // Validate file type
+  const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+  const validVideoTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+
+  if (![...validImageTypes, ...validVideoTypes].includes(file.type)) {
+    alert('Please select a valid image (JPG, PNG, GIF) or video (MP4, MOV, AVI) file.');
+    return;
+  }
+
+  // Validate file size (50MB max)
+  if (file.size > 50 * 1024 * 1024) {
+    alert('File size must be less than 50MB.');
+    return;
+  }
+
+  // Find the user habit ID for this completion
+  const page = usePage();
+  const currentUserId = page.props.auth.user.id;
+
+  // Normalize the date to YYYY-MM-DD format
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+  const checkDateStr = checkDate.toISOString().split('T')[0];
+
+  const userHabit = habit.all_user_habits?.find(uh => {
+    if (!uh) return false;
+    if (uh.user_id !== currentUserId) return false;
+    if (!uh.completed) return false;
+    if (!uh.completed_at) return false;
+
+    // Compare dates (normalized to YYYY-MM-DD)
+    const completedDateStr = uh.completed_at.split('T')[0];
+    return completedDateStr === checkDateStr;
+  });
+
+  if (!userHabit) {
+    alert('Error: Could not find habit completion. Please refresh the page and try again.');
+    return;
+  }
+
+  if (!userHabit.id) {
+    alert('Error: Habit completion is missing an ID. Please refresh the page and try again.');
+    return;
+  }
+
+  // Set media preview
+  selectedMediaFile.value = file;
+  selectedUserHabitId.value = userHabit.id;
+  mediaType.value = validImageTypes.includes(file.type) ? 'image' : 'video';
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    mediaPreview.value = e.target.result;
+    showMediaModal.value = true;
+  };
+  reader.readAsDataURL(file);
+};
+
+const closeMediaModal = () => {
+  showMediaModal.value = false;
+  selectedMediaFile.value = null;
+  mediaPreview.value = null;
+  mediaType.value = null;
+  selectedUserHabitId.value = null;
+};
+
+const handleMediaUploaded = () => {
+  // Reload the page data to show the new media
+  router.reload({ only: ['habits'] });
+};
+
+// Handle motivation modal
+const openMotivationModal = (user) => {
+  selectedMotivationUser.value = user;
+  showMotivationModal.value = true;
+};
+
+const closeMotivationModal = () => {
+  showMotivationModal.value = false;
+  selectedMotivationUser.value = null;
+};
+
 // Handle checkbox change
 const handleHabitToggle = (habit, date, completed) => {
   const page = usePage();
@@ -436,56 +596,9 @@ const handleHabitToggle = (habit, date, completed) => {
   }, {
     preserveState: true,
     preserveScroll: true,
-    onSuccess: () => {
-      // Update both user_habits and all_user_habits for immediate UI feedback
-      const checkDate = new Date(date);
-      checkDate.setHours(0, 0, 0, 0);
-
-      // Initialize arrays if they don't exist
-      if (!habit.user_habits) {
-        habit.user_habits = [];
-      }
-      if (!habit.all_user_habits) {
-        habit.all_user_habits = [];
-      }
-
-      // Update user_habits (current user only)
-      const existingUserHabitIndex = habit.user_habits.findIndex(uh => {
-        if (!uh.completed_at) return false;
-        const completedDate = new Date(uh.completed_at);
-        completedDate.setHours(0, 0, 0, 0);
-        return completedDate.getTime() === checkDate.getTime();
-      });
-
-      // Update all_user_habits (all users)
-      const existingAllUserHabitIndex = habit.all_user_habits.findIndex(uh => {
-        if (uh.user_id !== currentUserId || !uh.completed_at) return false;
-        const completedDate = new Date(uh.completed_at);
-        completedDate.setHours(0, 0, 0, 0);
-        return completedDate.getTime() === checkDate.getTime();
-      });
-
-      const newRecord = {
-        user_id: currentUserId,
-        habit_id: habit.id,
-        completed: completed,
-        completed_at: completed ? date.toISOString() : null,
-        user: page.props.auth.user // Include user info for consistency
-      };
-
-      // Update user_habits
-      if (existingUserHabitIndex >= 0) {
-        habit.user_habits[existingUserHabitIndex] = { ...newRecord };
-      } else if (completed) {
-        habit.user_habits.push({ ...newRecord });
-      }
-
-      // Update all_user_habits
-      if (existingAllUserHabitIndex >= 0) {
-        habit.all_user_habits[existingAllUserHabitIndex] = { ...newRecord };
-      } else if (completed) {
-        habit.all_user_habits.push({ ...newRecord });
-      }
+    onSuccess: (response) => {
+      // Reload habits data to get the updated user_habit with ID
+      router.reload({ only: ['habits'] });
     },
     onError: (errors) => {
       console.error('Error updating habit completion:', errors);
@@ -633,9 +746,9 @@ onUnmounted(() => {
             class="flex items-stretch border border-gray-200 hover:border-gray-300 transition-colors"
           >
             <div class="flex-1 p-2 md:p-3">
-              <div class="flex items-center gap-2 md:gap-3">
+              <div class="flex items-start gap-2 md:gap-3">
                 <!-- Checkbox only for today - larger on mobile -->
-                <div v-if="isToday(currentDate)" class="flex-shrink-0">
+                <div v-if="isToday(currentDate)" class="flex-shrink-0 pt-1">
                   <input
                     type="checkbox"
                     :checked="isHabitCompleted(habit, currentDate)"
@@ -655,25 +768,83 @@ onUnmounted(() => {
                       {{ habit.frequency }}
                     </span>
                     <!-- Shared users indicator (total count) -->
-                    <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" class="hidden md:flex" />
+                    <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" />
 
-                    <!-- User tags with completion status (only if shared with someone) - hidden on mobile -->
-                    <div v-if="habit.shared_with && habit.shared_with.length > 0" class="hidden md:flex items-center gap-1 flex-wrap">
-                      <span
-                        v-for="user in getAllHabitUsers(habit, currentDate)"
-                        :key="user.id"
-                        :style="getSharedUserTagStyle(habit, user.id, currentDate)"
-                        class="px-2 py-0.5 text-xs font-medium rounded-full flex items-center gap-1"
-                        :title="`${user.name} (${user.email})`"
+                    <!-- Upload media button (only if completed and today) -->
+                    <label
+                      v-if="isToday(currentDate) && isHabitCompleted(habit, currentDate) && !hasMediaForToday(habit, currentDate)"
+                      class="px-2 py-0.5 text-xs font-medium rounded bg-blue-100 hover:bg-blue-200 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <Upload :size="14" />
+                      <span class="hidden sm:inline">Add media</span>
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        class="hidden"
+                        @change="handleMediaFileSelect($event, habit, currentDate)"
+                      />
+                    </label>
+
+                    <!-- Delete media button (only if media exists) -->
+                    <button
+                      v-if="isToday(currentDate) && isHabitCompleted(habit, currentDate) && hasMediaForToday(habit, currentDate)"
+                      @click="handleDeleteMedia(habit, currentDate)"
+                      class="px-2 py-0.5 text-xs font-medium rounded bg-red-100 hover:bg-red-200 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 :size="14" />
+                      <span class="hidden sm:inline">Delete media</span>
+                    </button>
+
+                    <!-- Button to toggle users display -->
+                    <button
+                      v-if="habit.shared_with && habit.shared_with.length > 0"
+                      @click="toggleHabitUsers(habit.id)"
+                      class="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-1"
+                    >
+                      <component
+                        :is="expandedHabits[habit.id] ? ChevronUp : ChevronDown"
+                        :size="14"
+                      />
+                      {{ expandedHabits[habit.id] ? 'Hide' : 'Show' }} disciplined users
+                    </button>
+                  </div>
+
+                  <!-- User tags with completion status (collapsible) -->
+                  <div
+                    v-if="habit.shared_with && habit.shared_with.length > 0 && expandedHabits[habit.id]"
+                    class="mt-2 flex flex-col gap-1.5"
+                  >
+                    <div
+                      v-for="user in getAllHabitUsers(habit, currentDate)"
+                      :key="user.id"
+                      :style="getSharedUserTagStyle(habit, user.id, currentDate)"
+                      class="px-2 py-1.5 text-xs font-medium rounded flex items-center gap-2"
+                    >
+                      <component
+                        :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))"
+                        :size="16"
+                      />
+                      <span class="flex-1">{{ user.name }}</span>
+                      <span class="text-xs opacity-75">{{ getUserHabitCompletionStatus(habit, user.id, currentDate) }}</span>
+                      <!-- Motivate button (only for other users, not yourself) -->
+                      <button
+                        v-if="user.id !== $page.props.auth.user.id"
+                        @click.stop="openMotivationModal(user)"
+                        class="ml-2 px-2 py-1 text-xs font-medium rounded bg-white/20 hover:bg-white/40 transition-colors flex items-center gap-1"
+                        title="Motivate this user"
                       >
-                        <component
-                          :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))"
-                          :size="12"
-                        />
-                        {{ user.name }}
-                      </span>
+                        <Heart :size="14" />
+                        <span class="hidden sm:inline">Motivate</span>
+                      </button>
                     </div>
                   </div>
+
+                  <!-- Media viewer for all users -->
+                  <HabitMediaViewer
+                    :habit="habit"
+                    :date="currentDate"
+                    :users="getAllHabitUsers(habit, currentDate)"
+                  />
                 </div>
               </div>
             </div>
@@ -832,5 +1003,24 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Media Upload Modal -->
+    <HabitMediaModal
+      :show="showMediaModal"
+      :media-file="selectedMediaFile"
+      :media-preview="mediaPreview"
+      :media-type="mediaType"
+      :user-habit-id="selectedUserHabitId"
+      @close="closeMediaModal"
+      @uploaded="handleMediaUploaded"
+    />
+
+    <!-- Motivation Send Modal -->
+    <MotivationSendModal
+      v-if="selectedMotivationUser"
+      :show="showMotivationModal"
+      :user="selectedMotivationUser"
+      @close="closeMotivationModal"
+    />
   </div>
 </template>

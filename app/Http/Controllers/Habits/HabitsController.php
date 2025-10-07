@@ -23,9 +23,39 @@ class HabitsController extends Controller
             ])
             ->get()
             ->map(function ($habit) {
-                // Separate current user's habits and all user habits for shared users
-                $habit->user_habits = $habit->userHabits->where('user_id', auth()->user()->id)->values()->toArray();
-                $habit->all_user_habits = $habit->userHabits->toArray();
+                // Separate current user's habits and all user habits for shared users - explicitly include ID
+                $habit->user_habits = $habit->userHabits
+                    ->where('user_id', auth()->user()->id)
+                    ->map(function ($uh) {
+                        return [
+                            'id' => $uh->id,
+                            'user_id' => $uh->user_id,
+                            'habit_id' => $uh->habit_id,
+                            'completed' => $uh->completed,
+                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
+                            'media_path' => $uh->media_path,
+                            'media_type' => $uh->media_type,
+                            'media_caption' => $uh->media_caption,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
+
+                $habit->all_user_habits = $habit->userHabits
+                    ->map(function ($uh) {
+                        return [
+                            'id' => $uh->id,
+                            'user_id' => $uh->user_id,
+                            'habit_id' => $uh->habit_id,
+                            'completed' => $uh->completed,
+                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
+                            'media_path' => $uh->media_path,
+                            'media_type' => $uh->media_type,
+                            'media_caption' => $uh->media_caption,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
 
                 // Add pivot data (joined_at from updated_at) to shared_with users
                 if ($habit->sharedWith && $habit->sharedWith->count() > 0) {
@@ -54,9 +84,39 @@ class HabitsController extends Controller
             ])
             ->get()
             ->map(function ($habit) {
-                // Separate current user's habits and all user habits for shared users
-                $habit->user_habits = $habit->userHabits->where('user_id', auth()->user()->id)->values()->toArray();
-                $habit->all_user_habits = $habit->userHabits->toArray();
+                // Separate current user's habits and all user habits for shared users - explicitly include ID
+                $habit->user_habits = $habit->userHabits
+                    ->where('user_id', auth()->user()->id)
+                    ->map(function ($uh) {
+                        return [
+                            'id' => $uh->id,
+                            'user_id' => $uh->user_id,
+                            'habit_id' => $uh->habit_id,
+                            'completed' => $uh->completed,
+                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
+                            'media_path' => $uh->media_path,
+                            'media_type' => $uh->media_type,
+                            'media_caption' => $uh->media_caption,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
+
+                $habit->all_user_habits = $habit->userHabits
+                    ->map(function ($uh) {
+                        return [
+                            'id' => $uh->id,
+                            'user_id' => $uh->user_id,
+                            'habit_id' => $uh->habit_id,
+                            'completed' => $uh->completed,
+                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
+                            'media_path' => $uh->media_path,
+                            'media_type' => $uh->media_type,
+                            'media_caption' => $uh->media_caption,
+                        ];
+                    })
+                    ->values()
+                    ->toArray();
 
                 // Add pivot data (joined_at from updated_at) to shared_with users
                 if ($habit->sharedWith && $habit->sharedWith->count() > 0) {

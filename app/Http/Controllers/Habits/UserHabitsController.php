@@ -56,4 +56,70 @@ class UserHabitsController extends Controller
 
         return redirect()->back();
     }
+
+    /**
+     * Upload media (photo/video) for a completed habit
+     */
+    public function uploadMedia(Request $request, $userHabitId)
+    {
+        $validated = $request->validate([
+            'media' => 'required|file|mimes:jpg,jpeg,png,gif,mp4,mov,avi|max:51200', // 50MB max
+            'caption' => 'nullable|string|max:1000',
+        ]);
+
+        // Find the user habit and verify ownership
+        $userHabit = UserHabit::where('id', $userHabitId)
+                             ->where('user_id', auth()->id())
+                             ->where('completed', true)
+                             ->firstOrFail();
+
+        // Store the file
+        $file = $request->file('media');
+        $extension = $file->getClientOriginalExtension();
+        $filename = 'habit_' . $userHabitId . '_' . time() . '.' . $extension;
+        $path = $file->storeAs('habit_media', $filename, 'public');
+
+        // Determine media type
+        $mediaType = in_array($extension, ['jpg', 'jpeg', 'png', 'gif']) ? 'image' : 'video';
+
+        // Delete old media if exists
+        if ($userHabit->media_path) {
+            \Storage::disk('public')->delete($userHabit->media_path);
+        }
+
+        // Update user habit with media info
+        $userHabit->update([
+            'media_path' => $path,
+            'media_type' => $mediaType,
+            'media_caption' => $validated['caption'] ?? null,
+        ]);
+
+        return redirect()->back()->with('success', 'Media uploaded successfully!');
+    }
+
+    /**
+     * Delete media from a completed habit
+     */
+    public function deleteMedia($userHabitId)
+    {
+        // Find the user habit and verify ownership
+        $userHabit = UserHabit::where('id', $userHabitId)
+                             ->where('user_id', auth()->id())
+                             ->where('completed', true)
+                             ->firstOrFail();
+
+        // Delete the file from storage if exists
+        if ($userHabit->media_path) {
+            \Storage::disk('public')->delete($userHabit->media_path);
+        }
+
+        // Clear media fields
+        $userHabit->update([
+            'media_path' => null,
+            'media_type' => null,
+            'media_caption' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Media deleted successfully!');
+    }
 }
