@@ -219,6 +219,23 @@ const getHabitCompletionStatus = (habit, date) => {
   const checkDate = new Date(date);
   checkDate.setHours(0, 0, 0, 0);
 
+  // Check if current user is a shared user and when they joined
+  const page = usePage();
+  const currentUserId = page.props.auth.user.id;
+  const isOwner = habit.user?.id === currentUserId;
+
+  if (!isOwner && habit.shared_with) {
+    const sharedUser = habit.shared_with.find(u => u.id === currentUserId);
+    if (sharedUser && sharedUser.joined_at) {
+      const joinedDate = new Date(sharedUser.joined_at);
+      joinedDate.setHours(0, 0, 0, 0);
+
+      // If checking a date before the user joined, don't show it as missed
+      if (checkDate < joinedDate) {
+        return 'future'; // Treat as future (gray) - user hadn't joined yet
+      }
+    }
+  }
 
   // Check if there's a completion record for this date
   const completion = habit.user_habits?.find(uh => {
@@ -265,6 +282,23 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
 
   const checkDate = new Date(date);
   checkDate.setHours(0, 0, 0, 0);
+
+  // Check if this user is a shared user and when they joined
+  const page = usePage();
+  const isOwner = habit.user?.id === userId;
+
+  if (!isOwner && habit.shared_with) {
+    const sharedUser = habit.shared_with.find(u => u.id === userId);
+    if (sharedUser && sharedUser.joined_at) {
+      const joinedDate = new Date(sharedUser.joined_at);
+      joinedDate.setHours(0, 0, 0, 0);
+
+      // If checking a date before the user joined, don't show it as missed
+      if (checkDate < joinedDate) {
+        return 'future'; // Treat as future (gray) - user hadn't joined yet
+      }
+    }
+  }
 
   // Always use all_user_habits as the single source of truth
   // This ensures each user's completion status is independent

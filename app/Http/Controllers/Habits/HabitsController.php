@@ -26,6 +26,19 @@ class HabitsController extends Controller
                 // Separate current user's habits and all user habits for shared users
                 $habit->user_habits = $habit->userHabits->where('user_id', auth()->user()->id)->values()->toArray();
                 $habit->all_user_habits = $habit->userHabits->toArray();
+
+                // Add pivot data (joined_at from updated_at) to shared_with users
+                if ($habit->sharedWith) {
+                    $habit->shared_with = $habit->sharedWith->map(function ($user) {
+                        return [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'joined_at' => $user->pivot->updated_at,
+                        ];
+                    });
+                }
+
                 return $habit;
             });
 
@@ -41,12 +54,25 @@ class HabitsController extends Controller
                 // Separate current user's habits and all user habits for shared users
                 $habit->user_habits = $habit->userHabits->where('user_id', auth()->user()->id)->values()->toArray();
                 $habit->all_user_habits = $habit->userHabits->toArray();
+
+                // Add pivot data (joined_at from updated_at) to shared_with users
+                if ($habit->sharedWith) {
+                    $habit->shared_with = $habit->sharedWith->map(function ($user) {
+                        return [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'joined_at' => $user->pivot->updated_at,
+                        ];
+                    });
+                }
+
                 return $habit;
             });
 
         // Combine both collections
         $allHabits = $ownHabits->concat($sharedHabits);
-            
+
         return Inertia::render('Habit/Index', [
             'habits' => $allHabits,
         ]);
