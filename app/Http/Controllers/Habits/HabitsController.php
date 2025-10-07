@@ -28,15 +28,18 @@ class HabitsController extends Controller
                 $habit->all_user_habits = $habit->userHabits->toArray();
 
                 // Add pivot data (joined_at from updated_at) to shared_with users
-                if ($habit->sharedWith) {
-                    $habit->shared_with = $habit->sharedWith->map(function ($user) {
+                if ($habit->sharedWith && $habit->sharedWith->count() > 0) {
+                    $sharedWithData = $habit->sharedWith->map(function ($user) {
                         return [
                             'id' => $user->id,
                             'name' => $user->name,
                             'email' => $user->email,
-                            'joined_at' => $user->pivot->updated_at,
+                            'joined_at' => $user->pivot->updated_at ? $user->pivot->updated_at->toISOString() : null,
                         ];
-                    });
+                    })->values()->toArray();
+
+                    $habit->shared_with = $sharedWithData;
+                    unset($habit->sharedWith); // Remove original relation to avoid confusion
                 }
 
                 return $habit;
@@ -56,15 +59,18 @@ class HabitsController extends Controller
                 $habit->all_user_habits = $habit->userHabits->toArray();
 
                 // Add pivot data (joined_at from updated_at) to shared_with users
-                if ($habit->sharedWith) {
-                    $habit->shared_with = $habit->sharedWith->map(function ($user) {
+                if ($habit->sharedWith && $habit->sharedWith->count() > 0) {
+                    $sharedWithData = $habit->sharedWith->map(function ($user) {
                         return [
                             'id' => $user->id,
                             'name' => $user->name,
                             'email' => $user->email,
-                            'joined_at' => $user->pivot->updated_at,
+                            'joined_at' => $user->pivot->updated_at ? $user->pivot->updated_at->toISOString() : null,
                         ];
-                    });
+                    })->values()->toArray();
+
+                    $habit->shared_with = $sharedWithData;
+                    unset($habit->sharedWith); // Remove original relation to avoid confusion
                 }
 
                 return $habit;

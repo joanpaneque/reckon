@@ -289,6 +289,7 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
 
   if (!isOwner && habit.shared_with) {
     const sharedUser = habit.shared_with.find(u => u.id === userId);
+
     if (sharedUser && sharedUser.joined_at) {
       const joinedDate = new Date(sharedUser.joined_at);
       joinedDate.setHours(0, 0, 0, 0);
@@ -351,24 +352,56 @@ const getStatusIcon = (status) => {
   return icons[status] || icons.future;
 };
 
-// Get all users for a habit (owner + shared users, no duplicates)
-const getAllHabitUsers = (habit) => {
+// Get all users for a habit on a specific date (owner + shared users who have joined by that date, no duplicates)
+const getAllHabitUsers = (habit, date) => {
   const users = [];
+
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+
+  console.log('=== getAllHabitUsers ===');
+  console.log('Habit:', habit.name);
+  console.log('Check date:', checkDate.toLocaleDateString());
+  console.log('Shared with:', habit.shared_with);
 
   // 1. Always add the owner first (now we have habit.user from backend)
   if (habit.user) {
     users.push(habit.user);
+    console.log('Added owner:', habit.user.name);
   }
 
-  // 2. Add shared users, but avoid duplicates with owner
+  // 2. Add shared users, but only if they had joined by the given date
   if (habit.shared_with && habit.shared_with.length > 0) {
     habit.shared_with.forEach(sharedUser => {
-      // Only add if not already in the list (avoid duplicates with owner)
-      if (!users.some(u => u.id === sharedUser.id)) {
-        users.push(sharedUser);
+      console.log('Processing shared user:', sharedUser.name, 'joined_at:', sharedUser.joined_at);
+
+      // Check if user had joined by this date
+      if (sharedUser.joined_at) {
+        const joinedDate = new Date(sharedUser.joined_at);
+        joinedDate.setHours(0, 0, 0, 0);
+
+        console.log('  Joined date:', joinedDate.toLocaleDateString());
+        console.log('  Check date >= joined date?', checkDate >= joinedDate);
+
+        // Only add if user joined on or before the check date, and not already in list (avoid duplicates with owner)
+        if (checkDate >= joinedDate && !users.some(u => u.id === sharedUser.id)) {
+          users.push(sharedUser);
+          console.log('  ✓ Added user:', sharedUser.name);
+        } else {
+          console.log('  ✗ Not added - date condition not met');
+        }
+      } else {
+        console.log('  No joined_at - adding anyway');
+        // If no joined_at, add them (backwards compatibility or owner shared)
+        if (!users.some(u => u.id === sharedUser.id)) {
+          users.push(sharedUser);
+        }
       }
     });
   }
+
+  console.log('Final users:', users.map(u => u.name));
+  console.log('========================');
 
   return users;
 };
@@ -627,7 +660,7 @@ onUnmounted(() => {
                     <!-- User tags with completion status (only if shared with someone) - hidden on mobile -->
                     <div v-if="habit.shared_with && habit.shared_with.length > 0" class="hidden md:flex items-center gap-1 flex-wrap">
                       <span
-                        v-for="user in getAllHabitUsers(habit)"
+                        v-for="user in getAllHabitUsers(habit, currentDate)"
                         :key="user.id"
                         :style="getSharedUserTagStyle(habit, user.id, currentDate)"
                         class="px-2 py-0.5 text-xs font-medium rounded-full flex items-center gap-1"
@@ -649,7 +682,7 @@ onUnmounted(() => {
               class="flex flex-col w-[30px] md:w-[45px] border-l-2 border-white"
             >
               <div
-                v-for="user in getAllHabitUsers(habit)"
+                v-for="user in getAllHabitUsers(habit, currentDate)"
                 :key="user.id"
                 :style="{
                   backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, currentDate)),
@@ -707,7 +740,7 @@ onUnmounted(() => {
                 <!-- Status indicator on the right - grid for multiple users -->
                 <div class="flex flex-col w-[15px] md:w-[20px] border-l border-white">
                   <div
-                    v-for="user in getAllHabitUsers(habit)"
+                    v-for="user in getAllHabitUsers(habit, day.date)"
                     :key="user.id"
                     :style="{
                       backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, day.date)),
@@ -774,7 +807,7 @@ onUnmounted(() => {
                   <!-- Status indicator on the right - grid for multiple users -->
                   <div class="flex flex-col w-[12px] flex-shrink-0 border-l border-white">
                     <div
-                      v-for="user in getAllHabitUsers(habit)"
+                      v-for="user in getAllHabitUsers(habit, day.date)"
                       :key="user.id"
                       :style="{
                         backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, day.date)),
