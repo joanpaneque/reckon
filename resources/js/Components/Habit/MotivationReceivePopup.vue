@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { X, Heart, ChevronLeft, ChevronRight, Send } from 'lucide-vue-next';
+import { X, Heart, ChevronLeft, ChevronRight, Send, Gift, MessageCircle } from 'lucide-vue-next';
 import axios from 'axios';
 
 const motivations = ref([]);
@@ -50,12 +50,34 @@ const loadMotivations = async () => {
     motivations.value = motivationsRes.data;
     responses.value = responsesRes.data;
 
+    // Don't auto-open modal anymore, just load the data
     if (allItems.value.length > 0) {
-      showModal.value = true;
       currentIndex.value = 0;
     }
   } catch (error) {
     console.error('Error loading motivations:', error);
+  }
+};
+
+const openMotivationsModal = () => {
+  if (motivations.value.length > 0) {
+    // Find first motivation index
+    const motivationIndex = allItems.value.findIndex(item => item.type === 'motivation');
+    if (motivationIndex !== -1) {
+      currentIndex.value = motivationIndex;
+      showModal.value = true;
+    }
+  }
+};
+
+const openResponsesModal = () => {
+  if (responses.value.length > 0) {
+    // Find first response index
+    const responseIndex = allItems.value.findIndex(item => item.type === 'response');
+    if (responseIndex !== -1) {
+      currentIndex.value = responseIndex;
+      showModal.value = true;
+    }
   }
 };
 
@@ -115,23 +137,23 @@ const closeWithoutReply = async () => {
 
 const closeWithReply = async () => {
   if (!currentItem.value || currentItem.value.type !== 'motivation') return;
-  
+
   if (!replyMessage.value.trim()) {
     alert('Please write a reply message.');
     return;
   }
-  
+
   isSubmitting.value = true;
-  
+
   try {
     await axios.post(route('motivations.close', currentItem.value.data.id), {
       receiver_message: replyMessage.value,
     });
-    
+
     // Remove from array
     motivations.value = motivations.value.filter(m => m.id !== currentItem.value.data.id);
     replyMessage.value = '';
-    
+
     // Move to next or close modal
     if (allItems.value.length > 0) {
       if (currentIndex.value >= allItems.value.length) {
@@ -154,15 +176,48 @@ onMounted(() => {
 
 defineExpose({
   loadMotivations,
+  openMotivationsModal,
+  openResponsesModal,
 });
 </script>
 
 <template>
-  <div
-    v-if="showModal && currentItem"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
-  >
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+  <div>
+    <!-- Floating notification icons -->
+    <div class="fixed bottom-4 right-4 z-40 flex flex-col gap-3">
+      <!-- Motivations icon -->
+      <button
+        v-if="motivations.length > 0"
+        @click="openMotivationsModal"
+        class="relative p-4 bg-gradient-to-br from-red-400 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 animate-bounce"
+        title="You have new motivations!"
+      >
+        <Gift :size="28" />
+        <span class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 text-red-900 text-xs font-bold rounded-full flex items-center justify-center">
+          {{ motivations.length }}
+        </span>
+      </button>
+
+      <!-- Responses icon -->
+      <button
+        v-if="responses.length > 0"
+        @click="openResponsesModal"
+        class="relative p-4 bg-gradient-to-br from-green-400 to-green-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 animate-pulse"
+        title="You have new responses!"
+      >
+        <MessageCircle :size="28" />
+        <span class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 text-green-900 text-xs font-bold rounded-full flex items-center justify-center">
+          {{ responses.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Modal -->
+    <div
+      v-if="showModal && currentItem"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+    >
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
       <div class="flex items-center justify-between p-4 border-b border-gray-200">
         <div class="flex items-center gap-2">
@@ -308,6 +363,7 @@ defineExpose({
           </button>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- Image Viewer Modal -->
@@ -331,4 +387,32 @@ defineExpose({
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+</style>
 
