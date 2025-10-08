@@ -22,17 +22,17 @@ const props = defineProps({
 defineEmits(['click']);
 
 const classes = computed(() => {
-  const base = 'inline-block font-medium border focus:outline-none focus:ring-2 focus:ring-offset-2 no-underline';
+  const base = 'inline-block font-medium rounded-modern focus:outline-none transition-all duration-modern ease-in-out hover:scale-[1.02] no-underline';
 
   const variants = {
-    primary: 'bg-gray-900 border-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500',
-    secondary: 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500',
-    danger: 'bg-red-600 border-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    primary: 'bg-accent text-dark-primary hover:bg-gradient-to-r hover:from-accent hover:to-accent-hover hover:shadow-modern-hover active:bg-accent-active',
+    secondary: 'bg-dark-secondary border border-dark-input-border text-text-primary hover:border-accent hover:shadow-modern-hover',
+    danger: 'bg-red-600 text-text-primary hover:bg-red-700 hover:shadow-modern-hover active:bg-red-800',
   };
 
   const sizes = {
-    sm: 'px-3 py-1 text-sm',
-    md: 'px-4 py-2 text-sm',
+    sm: 'px-5 py-2 text-sm h-10 flex items-center',
+    md: 'px-5 py-3 text-base h-12 flex items-center',
   };
 
   return `${base} ${variants[props.variant]} ${sizes[props.size]}`;

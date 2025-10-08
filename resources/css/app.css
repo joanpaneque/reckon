@@ -1,4 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    * {
+        @apply transition-all duration-modern ease-in-out;
+    }
+
+    body {
+        @apply bg-dark-primary text-text-primary font-sans;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        line-height: 1.6;
+    }
+
+    h1 {
+        @apply text-h1 font-bold text-text-primary;
+    }
+
+    h2 {
+        @apply text-h2 font-semibold text-text-primary;
+    }
+
+    h3 {
+        @apply text-h3 font-semibold text-text-primary;
+    }
+
+    p {
+        @apply text-base text-text-secondary;
+    }
+
+    a {
+        @apply text-accent hover:underline;
+    }
+
+    input, textarea, select {
+        @apply bg-dark-secondary border border-dark-input-border text-text-primary;
+        @apply focus:border-accent focus:ring-1 focus:ring-accent focus:shadow-modern-focus;
+        @apply placeholder:text-text-tertiary;
+    }
+
+    button:disabled {
+        @apply bg-disabled-bg text-disabled-text cursor-not-allowed;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply h-12 px-5 rounded-modern bg-accent text-dark-primary font-medium;
+        @apply hover:bg-gradient-to-r hover:from-accent hover:to-accent-hover;
+        @apply active:bg-accent-active;
+        @apply disabled:bg-disabled-bg disabled:text-disabled-text;
+        @apply transition-all duration-modern ease-in-out;
+        @apply hover:scale-[1.02] hover:shadow-modern-hover;
+    }
+
+    .input-modern {
+        @apply h-11 bg-dark-secondary border border-dark-input-border text-text-primary rounded-modern px-4;
+        @apply focus:border-accent focus:ring-1 focus:ring-accent focus:shadow-modern-focus;
+        @apply placeholder:text-text-tertiary;
+    }
+
+    .card-modern {
+        @apply bg-dark-secondary border border-dark-border rounded-modern p-6 shadow-modern;
+    }
+
+    .nav-link {
+        @apply text-text-primary hover:text-accent transition-colors duration-modern;
+    }
+
+    .nav-link-active {
+        @apply text-accent underline;
+        text-decoration-thickness: 2px;
+    }
+}
 

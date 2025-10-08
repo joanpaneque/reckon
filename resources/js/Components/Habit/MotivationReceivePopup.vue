@@ -189,11 +189,11 @@ defineExpose({
       <button
         v-if="motivations.length > 0"
         @click="openMotivationsModal"
-        class="relative p-4 bg-gradient-to-br from-red-400 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 animate-bounce"
+        class="relative p-4 bg-gradient-to-br from-red-500 to-red-700 text-text-primary rounded-full shadow-modern hover:shadow-modern-hover hover:scale-110 transition-all duration-modern animate-bounce"
         title="You have new motivations!"
       >
-        <Gift :size="28" />
-        <span class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 text-red-900 text-xs font-bold rounded-full flex items-center justify-center">
+        <Gift :size="28" :stroke-width="2" />
+        <span class="absolute -top-1 -right-1 w-6 h-6 bg-accent text-dark-primary text-xs font-bold rounded-full flex items-center justify-center">
           {{ motivations.length }}
         </span>
       </button>
@@ -202,11 +202,11 @@ defineExpose({
       <button
         v-if="responses.length > 0"
         @click="openResponsesModal"
-        class="relative p-4 bg-gradient-to-br from-green-400 to-green-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 animate-pulse"
+        class="relative p-4 bg-gradient-to-br from-green-500 to-green-700 text-text-primary rounded-full shadow-modern hover:shadow-modern-hover hover:scale-110 transition-all duration-modern animate-pulse"
         title="You have new responses!"
       >
-        <MessageCircle :size="28" />
-        <span class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 text-green-900 text-xs font-bold rounded-full flex items-center justify-center">
+        <MessageCircle :size="28" :stroke-width="2" />
+        <span class="absolute -top-1 -right-1 w-6 h-6 bg-accent text-dark-primary text-xs font-bold rounded-full flex items-center justify-center">
           {{ responses.length }}
         </span>
       </button>
@@ -217,16 +217,16 @@ defineExpose({
       v-if="showModal && currentItem"
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
     >
-      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="card-modern rounded-modern shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <div class="flex items-center justify-between p-4 border-b border-dark-border">
         <div class="flex items-center gap-2">
-          <Heart :size="24" class="text-red-500" />
+          <Heart :size="24" :stroke-width="2" class="text-red-500" />
           <div>
-            <h2 class="text-xl font-semibold text-gray-900">
+            <h2 class="text-xl font-semibold text-text-primary">
               {{ currentItem.type === 'motivation' ? 'You have a motivation!' : 'You received a response!' }}
             </h2>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-text-secondary">
               {{ currentIndex + 1 }} of {{ totalCount }}
             </p>
           </div>
@@ -234,9 +234,9 @@ defineExpose({
         <button
           @click="showModal = false"
           :disabled="isSubmitting"
-          class="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+          class="p-2 hover:bg-dark-primary rounded-full transition-colors duration-modern disabled:opacity-50"
         >
-          <X :size="20" />
+          <X :size="20" :stroke-width="2" />
         </button>
       </div>
 
@@ -245,12 +245,12 @@ defineExpose({
         <!-- Motivation content -->
         <div v-if="currentItem.type === 'motivation'">
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+            <div class="w-10 h-10 bg-gradient-to-br from-accent to-accent-hover rounded-full flex items-center justify-center text-dark-primary font-semibold">
               {{ currentItem.data.sender?.name?.charAt(0).toUpperCase() || '?' }}
             </div>
             <div>
-              <p class="font-semibold text-gray-900">{{ currentItem.data.sender?.name || 'Unknown' }}</p>
-              <p class="text-xs text-gray-500">{{ new Date(currentItem.data.created_at).toLocaleString('en-US') }}</p>
+              <p class="font-semibold text-text-primary">{{ currentItem.data.sender?.name || 'Unknown' }}</p>
+              <p class="text-xs text-text-secondary">{{ new Date(currentItem.data.created_at).toLocaleString('en-US') }}</p>
             </div>
           </div>
 
@@ -259,34 +259,34 @@ defineExpose({
             <img
               :src="`/storage/${currentItem.data.image_path}`"
               alt="Motivation image"
-              class="w-full rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+              class="w-full rounded-modern border border-dark-border cursor-pointer hover:opacity-90 transition-opacity duration-modern"
               style="max-height: 250px; object-fit: contain;"
               @click="showImageViewer = true"
             />
-            <div class="mt-1 text-xs text-gray-500 text-center">
+            <div class="mt-1 text-xs text-text-secondary text-center">
               Click on image to enlarge
             </div>
           </div>
 
           <!-- Message -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p class="text-gray-800 whitespace-pre-wrap">{{ currentItem.data.message }}</p>
+          <div class="bg-accent/10 border border-accent/30 rounded-modern p-4">
+            <p class="text-text-primary whitespace-pre-wrap">{{ currentItem.data.message }}</p>
           </div>
 
           <!-- Reply section -->
           <div class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-text-secondary mb-2">
               Reply (optional)
             </label>
             <textarea
               v-model="replyMessage"
               rows="3"
               :disabled="isSubmitting"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-50"
+              class="input-modern w-full resize-none disabled:opacity-50"
               placeholder="Write a thank you message..."
               maxlength="1000"
             ></textarea>
-            <div class="mt-1 text-xs text-gray-500 text-right">
+            <div class="mt-1 text-xs text-text-secondary text-right">
               {{ replyMessage.length }} / 1000
             </div>
           </div>
@@ -295,50 +295,50 @@ defineExpose({
         <!-- Response content (when someone replied to your motivation) -->
         <div v-else-if="currentItem.type === 'response'">
           <div class="flex items-center gap-2 mb-4">
-            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-semibold">
+            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-text-primary font-semibold">
               {{ currentItem.data.receiver?.name?.charAt(0).toUpperCase() || '?' }}
             </div>
             <div>
-              <p class="font-semibold text-gray-900">{{ currentItem.data.receiver?.name || 'Unknown' }}</p>
-              <p class="text-xs text-gray-500">replied to your motivation</p>
+              <p class="font-semibold text-text-primary">{{ currentItem.data.receiver?.name || 'Unknown' }}</p>
+              <p class="text-xs text-text-secondary">replied to your motivation</p>
             </div>
           </div>
 
           <!-- Your original message -->
           <div class="mb-4">
-            <p class="text-xs font-medium text-gray-500 mb-2">Your original message:</p>
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ currentItem.data.message }}</p>
+            <p class="text-xs font-medium text-text-secondary mb-2">Your original message:</p>
+            <div class="bg-dark-primary border border-dark-border rounded-modern p-3">
+              <p class="text-sm text-text-secondary whitespace-pre-wrap">{{ currentItem.data.message }}</p>
             </div>
           </div>
 
           <!-- Their response -->
           <div>
-            <p class="text-xs font-medium text-gray-500 mb-2">Their response:</p>
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p class="text-gray-800 whitespace-pre-wrap">{{ currentItem.data.receiver_message }}</p>
+            <p class="text-xs font-medium text-text-secondary mb-2">Their response:</p>
+            <div class="bg-green-500/10 border border-green-500/30 rounded-modern p-4">
+              <p class="text-text-primary whitespace-pre-wrap">{{ currentItem.data.receiver_message }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-between p-4 border-t border-gray-200">
+      <div class="flex items-center justify-between p-4 border-t border-dark-border">
         <!-- Navigation -->
         <div class="flex items-center gap-2">
           <button
             @click="goToPrevious"
             :disabled="currentIndex === 0 || isSubmitting"
-            class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="p-2 text-text-secondary hover:bg-dark-primary rounded-modern transition-colors duration-modern disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ChevronLeft :size="20" />
+            <ChevronLeft :size="20" :stroke-width="2" />
           </button>
           <button
             @click="goToNext"
             :disabled="currentIndex >= totalCount - 1 || isSubmitting"
-            class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="p-2 text-text-secondary hover:bg-dark-primary rounded-modern transition-colors duration-modern disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <ChevronRight :size="20" />
+            <ChevronRight :size="20" :stroke-width="2" />
           </button>
         </div>
 
@@ -347,18 +347,18 @@ defineExpose({
           <button
             @click="closeWithoutReply"
             :disabled="isSubmitting"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+            class="px-4 py-2 text-sm font-medium text-text-primary bg-dark-primary hover:bg-dark-border rounded-modern transition-colors duration-modern disabled:opacity-50 flex items-center gap-2"
           >
-            <X :size="16" />
+            <X :size="16" :stroke-width="2" />
             {{ currentItem.type === 'response' ? 'Close' : 'Close without replying' }}
           </button>
           <button
             v-if="currentItem.type === 'motivation'"
             @click="closeWithReply"
             :disabled="isSubmitting || !replyMessage.trim()"
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <Send :size="16" />
+            <Send :size="16" :stroke-width="2" />
             {{ isSubmitting ? 'Sending...' : 'Reply and close' }}
           </button>
         </div>
@@ -374,14 +374,14 @@ defineExpose({
     >
       <button
         @click="showImageViewer = false"
-        class="absolute top-4 right-4 p-2 bg-white rounded-full hover:bg-gray-100 transition-colors z-10"
+        class="absolute top-4 right-4 p-2 bg-accent hover:bg-accent-hover rounded-full transition-colors duration-modern z-10"
       >
-        <X :size="24" />
+        <X :size="24" :stroke-width="2" class="text-dark-primary" />
       </button>
       <img
         :src="`/storage/${currentItem.data.image_path}`"
         alt="Motivation image"
-        class="max-w-full max-h-full rounded-lg"
+        class="max-w-full max-h-full rounded-modern"
         @click.stop
       />
     </div>

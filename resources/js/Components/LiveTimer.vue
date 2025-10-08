@@ -37,5 +37,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <span class="font-mono text-sm text-blue-600">{{ elapsed }}</span>
+  <span class="font-mono text-sm text-accent">{{ elapsed }}</span>
 </template>

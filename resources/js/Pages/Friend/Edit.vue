@@ -37,7 +37,7 @@ const friendName = computed(() => {
   <AppLayout title="Respond to friend request">
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-medium text-gray-900">Respond to friend request</h1>
+        <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">Respond to friend request</h1>
         <LinkButton prefetch :href="route('friends.index')" variant="secondary">
           Back to list
         </LinkButton>
@@ -46,12 +46,12 @@ const friendName = computed(() => {
       <Card>
         <div class="space-y-6">
           <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Friend request</h3>
-            <p class="text-gray-600">
-              <span class="font-medium">{{ friendName }}</span> wants to be your friend.
+            <h3 class="text-lg font-semibold text-text-primary mb-2">Friend request</h3>
+            <p class="text-text-secondary">
+              <span class="font-medium text-text-primary">{{ friendName }}</span> wants to be your friend.
             </p>
             <div class="mt-2">
-              <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+              <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-500/20 text-yellow-400">
                 {{ friendship.status }}
               </span>
             </div>
@@ -74,7 +74,7 @@ const friendName = computed(() => {
             </Button>
           </div>
 
-          <div v-else class="text-sm text-gray-500">
+          <div v-else class="text-sm text-text-secondary">
             This friend request has already been responded to.
           </div>
         </div>

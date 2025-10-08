@@ -103,16 +103,16 @@ const submit = () => {
 <template>
   <form @submit.prevent="submit" class="space-y-6">
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">Name</label>
       <Input v-model="form.name" :error="form.errors.name" />
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">Description</label>
       <textarea
         v-model="form.description"
-        class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        :class="{ 'border-red-500': form.errors.description }"
+        class="input-modern w-full resize-none"
+        :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600': form.errors.description }"
         rows="3"
         placeholder="Optional description..."
       />
@@ -122,7 +122,7 @@ const submit = () => {
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">Start Date</label>
       <div class="flex gap-2">
         <Input
           v-model="form.start_date"
@@ -133,7 +133,7 @@ const submit = () => {
         <button
           type="button"
           @click="setToday"
-          class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+          class="btn-primary"
         >
           Now
         </button>
@@ -141,7 +141,7 @@ const submit = () => {
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">End Date</label>
       <Input
         v-model="form.end_date"
         :error="form.errors.end_date"
@@ -150,11 +150,11 @@ const submit = () => {
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">Frequency</label>
       <select
         v-model="form.frequency"
-        class="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        :class="{ 'border-red-500': form.errors.frequency }"
+        class="input-modern w-full"
+        :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600': form.errors.frequency }"
       >
         <option value="everyday">Everyday</option>
         <option value="weekdays">Weekdays</option>
@@ -166,8 +166,8 @@ const submit = () => {
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
-      
+      <label class="block text-sm font-medium text-text-secondary mb-2">Color</label>
+
       <!-- Preset Colors Grid -->
       <div style="display: grid; grid-template-columns: repeat(6, 2rem); gap: 0.25rem; margin-bottom: 0.75rem;">
         <button
@@ -177,8 +177,8 @@ const submit = () => {
           @click="form.color = color"
           :style="{ backgroundColor: color }"
           :class="[
-            'w-8 h-8 rounded border-2 transition-all hover:scale-110',
-            form.color === color ? 'border-gray-900 ring-2 ring-gray-900 ring-offset-2' : 'border-gray-300'
+            'w-8 h-8 rounded-modern border-2 transition-all duration-modern hover:scale-110',
+            form.color === color ? 'border-accent ring-2 ring-accent ring-offset-2 ring-offset-dark-primary' : 'border-dark-border'
           ]"
           :title="color"
         />
@@ -190,7 +190,7 @@ const submit = () => {
           <input
             type="color"
             v-model="form.color"
-            class="w-full h-10 border border-gray-300 rounded cursor-pointer"
+            class="w-full h-10 border border-dark-input-border rounded-modern cursor-pointer bg-dark-secondary"
           />
         </div>
         <input
@@ -198,12 +198,12 @@ const submit = () => {
           v-model="form.color"
           placeholder="#93C5FD"
           maxlength="7"
-          class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm uppercase w-28"
-          :class="{ 'border-red-500': form.errors.color }"
+          class="input-modern font-mono text-sm uppercase w-28"
+          :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600': form.errors.color }"
         />
         <div
           :style="{ backgroundColor: form.color }"
-          class="w-10 h-10 border-2 border-gray-300 rounded"
+          class="w-10 h-10 border-2 border-dark-border rounded-modern"
         />
       </div>
       <p v-if="form.errors.color" class="mt-1 text-sm text-red-600">
@@ -212,12 +212,12 @@ const submit = () => {
     </div>
 
     <!-- Share with friends section -->
-    <div class="border-t pt-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Share with friends</h3>
+    <div class="border-t border-dark-border pt-6">
+      <h3 class="text-lg font-semibold text-text-primary mb-4">Share with friends</h3>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="block text-sm font-medium text-text-secondary mb-1">
             Add friend
           </label>
           <AutocompleteInput
@@ -240,17 +240,17 @@ const submit = () => {
           <div
             v-for="(friend, index) in form.shared_with"
             :key="friend.email"
-            class="flex items-center gap-3 p-3 border border-gray-200 hover:border-gray-300 transition-colors"
+            class="flex items-center gap-3 p-3 border border-dark-border rounded-modern hover:border-accent transition-colors duration-modern"
           >
             <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">{{ friend.name }}</p>
-              <p class="text-xs text-gray-500">{{ friend.email }}</p>
+              <p class="text-sm font-medium text-text-primary">{{ friend.name }}</p>
+              <p class="text-xs text-text-secondary">{{ friend.email }}</p>
             </div>
 
             <button
               type="button"
               @click="removeFriend(index)"
-              class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+              class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-600/10 rounded-modern transition-colors duration-modern"
             >
               Remove
             </button>
@@ -259,7 +259,7 @@ const submit = () => {
       </div>
     </div>
 
-    <div class="flex justify-end pt-4 border-t">
+    <div class="flex justify-end pt-4 border-t border-dark-border">
       <Button type="submit" :disabled="form.processing">
         {{ submitLabel }}
       </Button>

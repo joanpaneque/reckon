@@ -215,6 +215,15 @@ const getHabitStyle = (habit) => {
   };
 };
 
+const getHabitGradientStyle = (habit) => {
+  const habitColor = habit.color || '#93C5FD';
+  // Crear un gradiente más suave y moderno con 3 stops
+  return {
+    background: `linear-gradient(90deg, #0F0F0F 0%, #1A1A1A 30%, ${habitColor} 100%)`,
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)', // Sombra sutil
+  };
+};
+
 const getContrastColor = (hexColor) => {
   // Convert hex to RGB
   const r = parseInt(hexColor.slice(1, 3), 16);
@@ -284,12 +293,23 @@ const getHabitCompletionStatus = (habit, date) => {
 // Get status bar color
 const getStatusBarColor = (status) => {
   const colors = {
-    completed: '#10B981', // Verde
-    today: '#F59E0B',     // Amarillo
-    missed: '#EF4444',    // Rojo
-    future: '#9CA3AF',    // Gris
+    completed: '#10b981', // Verde esmeralda moderno
+    today: '#f59e0b',     // Ámbar vibrante
+    missed: '#ef4444',    // Rojo coral
+    future: '#6b7280',    // Gris neutro
   };
   return colors[status] || colors.future;
+};
+
+// Get status gradient for modern look
+const getStatusGradient = (status) => {
+  const gradients = {
+    completed: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Verde esmeralda a verde bosque
+    today: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',     // Ámbar a naranja profundo
+    missed: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',    // Rojo coral a rojo intenso
+    future: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',    // Gris claro a gris oscuro
+  };
+  return gradients[status] || gradients.future;
 };
 
 // Get completion status for a specific user on a habit and date
@@ -349,12 +369,12 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
 // Get tag style for shared user based on completion status
 const getSharedUserTagStyle = (habit, userId, date) => {
   const status = getUserHabitCompletionStatus(habit, userId, date);
-  const backgroundColor = getStatusBarColor(status);
-  const textColor = getContrastColor(backgroundColor);
+  const gradient = getStatusGradient(status);
 
   return {
-    backgroundColor,
-    color: textColor,
+    background: gradient,
+    color: '#FFFFFF', // Siempre texto blanco para mejor contraste con gradientes
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Sombra sutil para profundidad
   };
 };
 
@@ -402,7 +422,19 @@ const getAllHabitUsers = (habit, date) => {
     });
   }
 
+  // Sort users alphabetically by name
+  users.sort((a, b) => a.name.localeCompare(b.name));
+
   return users;
+};
+
+// Get user initials (e.g., "Joan Paneque Domingo" -> "J.P.D")
+const getUserInitials = (name) => {
+  if (!name) return '';
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .join('.');
 };
 
 // Check if a date is today
@@ -412,6 +444,24 @@ const isToday = (date) => {
   return today.getDate() === checkDate.getDate() &&
          today.getMonth() === checkDate.getMonth() &&
          today.getFullYear() === checkDate.getFullYear();
+};
+
+// Check if date is in the past
+const isPastDate = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+  return checkDate < today;
+};
+
+// Check if date is in the future
+const isFutureDate = (date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+  return checkDate > today;
 };
 
 // Get completion status for checkbox (for current user)
@@ -682,101 +732,116 @@ onUnmounted(() => {
 <template>
   <div class="space-y-3 md:space-y-4">
     <!-- Header with view controls -->
-    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div class="px-4 md:px-0 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div class="flex items-center gap-1 md:gap-2">
         <button
           @click="goToPrevious"
-          class="p-1.5 md:p-2 hover:bg-gray-100 transition-colors flex-shrink-0"
+          class="p-1.5 md:p-2 hover:bg-dark-secondary/50 transition-colors flex-shrink-0"
         >
           <ChevronLeft :size="20" />
         </button>
-        <h2 class="text-sm md:text-lg font-medium text-gray-900 text-center flex-1 md:min-w-[280px]">
+        <h2 class="text-sm md:text-lg font-medium text-text-primary text-center flex-1 md:min-w-[280px]">
           {{ formatDateHeader }}
         </h2>
         <button
           @click="goToNext"
-          class="p-1.5 md:p-2 hover:bg-gray-100 transition-colors flex-shrink-0"
+          class="p-1.5 md:p-2 hover:bg-dark-secondary/50 transition-colors flex-shrink-0"
         >
           <ChevronRight :size="20" />
         </button>
         <button
           @click="goToToday"
-          class="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors flex-shrink-0"
+          class="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-text-secondary bg-dark-secondary hover:bg-dark-input-border transition-colors flex-shrink-0"
         >
           Today
         </button>
       </div>
 
-      <div class="flex gap-1">
-        <button
-          v-for="mode in viewModes"
-          :key="mode.value"
-          @click="viewMode = mode.value"
-          :class="[
-            'flex-1 md:flex-none px-3 py-1.5 text-xs md:text-sm font-medium transition-colors',
-            viewMode === mode.value
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          ]"
-        >
-          {{ mode.label }}
-        </button>
+      <div class="flex flex-col md:flex-row items-center md:items-center gap-2">
+        <!-- Date status message (always reserves space to avoid CLS) -->
+        <div class="text-xs font-medium whitespace-nowrap text-center min-h-[20px] flex items-center justify-center">
+          <!-- Today with incomplete habits: show countdown -->
+          <span v-if="viewMode === 'day' && isToday(currentDate) && hasIncompleteHabitsToday" class="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">
+            <span class="font-mono font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">{{ formatCountdown }}</span> left
+          </span>
+          <!-- Past date -->
+          <span v-else-if="viewMode === 'day' && isPastDate(currentDate)" class="text-text-tertiary">
+            Viewing a day from the past
+          </span>
+          <!-- Future date -->
+          <span v-else-if="viewMode === 'day' && isFutureDate(currentDate)" class="text-text-tertiary">
+            Viewing a day from the future
+          </span>
+        </div>
+
+        <div class="hidden md:flex gap-1">
+          <button
+            v-for="mode in viewModes"
+            :key="mode.value"
+            @click="viewMode = mode.value"
+            :class="[
+              'flex-1 md:flex-none px-3 py-1.5 text-xs md:text-sm font-medium transition-colors rounded-modern',
+              viewMode === mode.value
+                ? 'bg-accent text-dark-primary'
+                : 'bg-dark-secondary text-text-secondary hover:bg-dark-input-border'
+            ]"
+          >
+            {{ mode.label }}
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Day View -->
-    <div v-if="viewMode === 'day'" class="border border-gray-200">
-      <div class="bg-gray-50 px-3 md:px-4 py-2 md:py-3 border-b border-gray-200">
-        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <h3 class="text-sm md:text-base font-medium text-gray-900">Habits for this day</h3>
-          <!-- Countdown timer for incomplete habits -->
-          <div v-if="hasIncompleteHabitsToday" class="text-xs md:text-sm text-orange-600 font-medium">
-            You have <span class="font-mono font-bold text-orange-800">{{ formatCountdown }}</span> to complete your daily habits
-          </div>
-        </div>
-      </div>
-      <div class="p-2 md:p-4">
-        <div v-if="dayViewHabits.length === 0" class="text-center py-8 text-gray-500 text-sm">
+    <div v-if="viewMode === 'day'" class="space-y-2">
+      <div class="px-4 md:px-0">
+        <div v-if="dayViewHabits.length === 0" class="text-center py-8 text-text-secondary text-sm">
           No habits scheduled for this day
         </div>
-        <div v-else style="display: flex; flex-direction: column; gap: 1px;">
+        <div v-else class="flex flex-col gap-2 md:gap-3">
           <div
             v-for="habit in dayViewHabits"
             :key="habit.id"
-            class="flex items-stretch border border-gray-200 hover:border-gray-300 transition-colors"
+            class="flex flex-col gap-0 border-2 border-white/10 rounded-modern overflow-hidden"
           >
-            <div class="flex-1 p-2 md:p-3">
-              <div class="flex items-start gap-2 md:gap-3">
-                <!-- Checkbox only for today - larger on mobile -->
-                <div v-if="isToday(currentDate)" class="flex-shrink-0 pt-1">
-                  <input
-                    type="checkbox"
-                    :checked="isHabitCompleted(habit, currentDate)"
-                    @change="handleHabitToggle(habit, currentDate, $event.target.checked)"
-                    class="w-6 h-6 md:w-5 md:h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
-                  />
+            <!-- Row 1: Clickable habit container -->
+            <div
+              class="group hover:scale-[1.005] transition-all duration-modern cursor-pointer p-2 md:p-3 relative shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.3)]"
+              :class="isToday(currentDate) ? 'hover:border-accent' : ''"
+              :style="getHabitGradientStyle(habit)"
+              @click="isToday(currentDate) ? handleHabitToggle(habit, currentDate, !isHabitCompleted(habit, currentDate)) : null"
+            >
+              <!-- Visual indicator for clickability -->
+              <div v-if="isToday(currentDate)" class="absolute top-2 right-2 md:top-3 md:right-3 transition-all duration-modern">
+                <div
+                  v-if="isHabitCompleted(habit, currentDate)"
+                  class="w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm"
+                >
+                  <Check :size="16" :stroke-width="3" class="text-white" />
                 </div>
+                <div
+                  v-else
+                  class="w-6 h-6 rounded-full border-2 border-white/20 group-hover:border-white/40 group-hover:bg-white/5 transition-all duration-modern"
+                />
+              </div>
+
+              <div class="flex items-start gap-2 md:gap-3 pr-8">
                 <div class="flex-1 min-w-0">
-                  <LinkButton prefetch :href="route('habits.show', habit.id)" variant="secondary" size="sm" class="text-sm md:text-base">
+                  <h3 class="text-sm md:text-base font-semibold text-text-primary mb-1 group-hover:text-accent transition-colors duration-modern">
                     {{ habit.name }}
-                  </LinkButton>
+                  </h3>
                   <div class="mt-1 flex items-center gap-1.5 md:gap-2 flex-wrap">
-                    <span
-                      :style="getHabitStyle(habit)"
-                      class="px-1.5 md:px-2 py-0.5 text-xs font-medium rounded-full"
-                    >
-                      {{ habit.frequency }}
-                    </span>
                     <!-- Shared users indicator (total count) -->
                     <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" />
 
                     <!-- Upload media button (only if completed and today) -->
                     <label
                       v-if="isToday(currentDate) && isHabitCompleted(habit, currentDate) && !hasMediaForToday(habit, currentDate)"
-                      class="px-2 py-0.5 text-xs font-medium rounded bg-blue-100 hover:bg-blue-200 transition-colors flex items-center gap-1 cursor-pointer"
+                      class="flex items-center gap-1.5 bg-white/5 border border-white/20 text-text-secondary hover:bg-white/10 hover:border-white/30 px-2.5 py-1.5 rounded-modern cursor-pointer transition-all duration-modern hover:scale-105 hover:shadow-lg"
+                      @click.stop
                     >
-                      <Upload :size="14" />
-                      <span class="hidden sm:inline">Add media</span>
+                      <Upload :size="16" :stroke-width="2" />
+                      <span class="text-xs font-medium hidden sm:inline">Add media</span>
                       <input
                         type="file"
                         accept="image/*,video/*"
@@ -788,80 +853,56 @@ onUnmounted(() => {
                     <!-- Delete media button (only if media exists) -->
                     <button
                       v-if="isToday(currentDate) && isHabitCompleted(habit, currentDate) && hasMediaForToday(habit, currentDate)"
-                      @click="handleDeleteMedia(habit, currentDate)"
-                      class="px-2 py-0.5 text-xs font-medium rounded bg-red-100 hover:bg-red-200 transition-colors flex items-center gap-1"
+                      @click.stop="handleDeleteMedia(habit, currentDate)"
+                      class="flex items-center gap-1.5 bg-red-600/10 border border-red-600/30 text-red-400 hover:bg-red-600/20 hover:border-red-600/50 px-2.5 py-1.5 rounded-modern cursor-pointer transition-all duration-modern hover:scale-105 hover:shadow-lg"
                     >
-                      <Trash2 :size="14" />
-                      <span class="hidden sm:inline">Delete media</span>
-                    </button>
-
-                    <!-- Button to toggle users display -->
-                    <button
-                      v-if="habit.shared_with && habit.shared_with.length > 0"
-                      @click="toggleHabitUsers(habit.id)"
-                      class="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 hover:bg-gray-200 transition-colors flex items-center gap-1"
-                    >
-                      <component
-                        :is="expandedHabits[habit.id] ? ChevronUp : ChevronDown"
-                        :size="14"
-                      />
-                      {{ expandedHabits[habit.id] ? 'Hide' : 'Show' }} disciplined users
+                      <Trash2 :size="16" :stroke-width="2" />
+                      <span class="text-xs font-medium hidden sm:inline">Delete media</span>
                     </button>
                   </div>
-
-                  <!-- User tags with completion status (collapsible) -->
-                  <div
-                    v-if="habit.shared_with && habit.shared_with.length > 0 && expandedHabits[habit.id]"
-                    class="mt-2 flex flex-col gap-1.5"
-                  >
-                    <div
-                      v-for="user in getAllHabitUsers(habit, currentDate)"
-                      :key="user.id"
-                      :style="getSharedUserTagStyle(habit, user.id, currentDate)"
-                      class="px-2 py-1.5 text-xs font-medium rounded flex items-center gap-2"
-                    >
-                      <component
-                        :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))"
-                        :size="16"
-                      />
-                      <span class="flex-1">{{ user.name }}</span>
-                      <span class="text-xs opacity-75">{{ getUserHabitCompletionStatus(habit, user.id, currentDate) }}</span>
-                      <!-- Motivate button (only for other users, not yourself) -->
-                      <button
-                        v-if="user.id !== $page.props.auth.user.id"
-                        @click.stop="openMotivationModal(user)"
-                        class="ml-2 px-2 py-1 text-xs font-medium rounded bg-white/20 hover:bg-white/40 transition-colors flex items-center gap-1"
-                        title="Motivate this user"
-                      >
-                        <Heart :size="14" />
-                        <span class="hidden sm:inline">Motivate</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Media viewer for all users -->
-                  <HabitMediaViewer
-                    :habit="habit"
-                    :date="currentDate"
-                    :users="getAllHabitUsers(habit, currentDate)"
-                  />
                 </div>
               </div>
             </div>
-            <!-- Status indicator on the right - grid for multiple users -->
+
+            <!-- Row 2: Users list (always visible, horizontal) -->
             <div
-              class="flex flex-col w-[30px] md:w-[45px] border-l-2 border-white"
+              v-if="habit.shared_with && habit.shared_with.length > 0"
+              class="bg-dark-secondary px-2 md:px-3 py-2 flex items-center gap-2 flex-wrap border-t border-dark-border"
+              @click.stop
             >
               <div
                 v-for="user in getAllHabitUsers(habit, currentDate)"
                 :key="user.id"
-                :style="{
-                  backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, currentDate)),
-                  flex: 1
-                }"
-                :title="`${user.name}: ${getUserHabitCompletionStatus(habit, user.id, currentDate)}`"
-              />
+                :style="getSharedUserTagStyle(habit, user.id, currentDate)"
+                :class="user.id !== $page.props.auth.user.id ? 'cursor-pointer hover:scale-105 hover:shadow-lg' : ''"
+                class="h-7 px-2 text-xs font-medium rounded flex items-center gap-1.5 w-fit transition-all duration-modern"
+                @click="user.id !== $page.props.auth.user.id ? openMotivationModal(user) : null"
+                :title="user.id !== $page.props.auth.user.id ? `Motivate ${user.name}` : user.name"
+              >
+                <component
+                  :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))"
+                  :size="14"
+                  :stroke-width="2"
+                />
+                <span class="md:hidden">{{ getUserInitials(user.name) }}</span>
+                <span class="hidden md:inline">{{ user.name }}</span>
+                <!-- Heart icon (only for other users, not yourself) -->
+                <Heart
+                  v-if="user.id !== $page.props.auth.user.id"
+                  :size="12"
+                  :stroke-width="2"
+                  class="ml-1"
+                />
+              </div>
             </div>
+
+            <!-- Row 3: Shared moments (media viewer) -->
+            <HabitMediaViewer
+              :habit="habit"
+              :date="currentDate"
+              :users="getAllHabitUsers(habit, currentDate)"
+              class="border-t border-dark-border"
+            />
           </div>
         </div>
       </div>
@@ -869,32 +910,32 @@ onUnmounted(() => {
 
     <!-- Week View -->
     <div v-if="viewMode === 'week'" class="w-full overflow-x-auto">
-      <div class="border border-gray-200 min-w-[640px]">
+      <div class="border border-dark-border min-w-[640px]">
         <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));">
           <div
             v-for="day in weekDays"
             :key="day.date.toISOString()"
-            class="border-r border-gray-200 last:border-r-0"
+            class="border-r border-dark-border last:border-r-0"
             style="min-width: 0;"
           >
             <div
               :class="[
-                'px-1 md:px-2 py-1.5 md:py-2 text-center border-b border-gray-200',
-                day.isToday ? 'bg-blue-50' : 'bg-gray-50'
+                'px-1 md:px-2 py-1.5 md:py-2 text-center border-b border-dark-border',
+                day.isToday ? 'bg-accent/10' : 'bg-dark-secondary'
               ]"
             >
-              <div class="text-xs font-medium text-gray-600">{{ day.dayName }}</div>
+              <div class="text-xs font-medium text-text-secondary">{{ day.dayName }}</div>
               <div
                 :class="[
                   'text-base md:text-lg font-semibold',
-                  day.isToday ? 'text-blue-600' : 'text-gray-900'
+                  day.isToday ? 'text-accent' : 'text-text-primary'
                 ]"
               >
                 {{ day.dayNumber }}
               </div>
             </div>
             <div class="p-1 md:p-2 min-h-[100px] md:min-h-[120px]">
-              <div v-if="day.habits.length === 0" class="text-xs text-gray-400 text-center mt-2 md:mt-4">
+              <div v-if="day.habits.length === 0" class="text-xs text-text-tertiary text-center mt-2 md:mt-4">
                 No habits
               </div>
               <div v-else style="display: flex; flex-direction: column; gap: 1px;">
@@ -909,12 +950,12 @@ onUnmounted(() => {
                   <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" class="hidden md:flex" />
                 </div>
                 <!-- Status indicator on the right - grid for multiple users -->
-                <div class="flex flex-col w-[15px] md:w-[20px] border-l border-white">
+                <div class="flex flex-col w-[15px] md:w-[20px] border-l border-dark-border">
                   <div
                     v-for="user in getAllHabitUsers(habit, day.date)"
                     :key="user.id"
                     :style="{
-                      backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, day.date)),
+                      background: getStatusGradient(getUserHabitCompletionStatus(habit, user.id, day.date)),
                       flex: 1
                     }"
                     :title="`${user.name}: ${getUserHabitCompletionStatus(habit, user.id, day.date)}`"
@@ -930,10 +971,10 @@ onUnmounted(() => {
 
     <!-- Month View -->
     <div v-if="viewMode === 'month'" class="w-full overflow-x-auto">
-      <div class="border border-gray-200 min-w-[640px]">
+      <div class="border border-dark-border min-w-[640px]">
         <!-- Day headers -->
-        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="bg-gray-50 border-b border-gray-200">
-          <div v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :key="day" class="px-1 md:px-2 py-1.5 md:py-2 text-center text-xs font-medium text-gray-600 border-r border-gray-200 last:border-r-0">
+        <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="bg-dark-secondary border-b border-dark-border">
+          <div v-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']" :key="day" class="px-1 md:px-2 py-1.5 md:py-2 text-center text-xs font-medium text-text-secondary border-r border-dark-border last:border-r-0">
             <span class="hidden md:inline">{{ day }}</span>
             <span class="md:hidden">{{ day.charAt(0) }}</span>
           </div>
@@ -945,10 +986,10 @@ onUnmounted(() => {
             v-for="(day, index) in monthDays"
             :key="index"
             :class="[
-              'border-r border-b border-gray-200 last:border-r-0 p-1 md:p-2 relative',
-              !day.isCurrentMonth ? 'bg-gray-50' : '',
-              day.isToday ? 'bg-blue-50' : '',
-              day.isPreviousMonth || day.isNextMonth ? 'text-gray-400' : ''
+              'border-r border-b border-dark-border last:border-r-0 p-1 md:p-2 relative',
+              !day.isCurrentMonth ? 'bg-dark-secondary' : '',
+              day.isToday ? 'bg-accent/10' : '',
+              day.isPreviousMonth || day.isNextMonth ? 'text-text-tertiary' : ''
             ]"
             style="min-height: 80px;"
           >
@@ -956,7 +997,7 @@ onUnmounted(() => {
               <div
                 :class="[
                   'text-xs md:text-sm font-semibold mb-0.5 md:mb-1',
-                  day.isToday ? 'text-blue-600' : day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                  day.isToday ? 'text-accent' : day.isCurrentMonth ? 'text-text-primary' : 'text-text-tertiary'
                 ]"
               >
                 {{ day.dayNumber }}
@@ -976,12 +1017,12 @@ onUnmounted(() => {
                     <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" class="hidden md:flex" />
                   </div>
                   <!-- Status indicator on the right - grid for multiple users -->
-                  <div class="flex flex-col w-[12px] flex-shrink-0 border-l border-white">
+                  <div class="flex flex-col w-[12px] flex-shrink-0 border-l border-dark-border">
                     <div
                       v-for="user in getAllHabitUsers(habit, day.date)"
                       :key="user.id"
                       :style="{
-                        backgroundColor: getStatusBarColor(getUserHabitCompletionStatus(habit, user.id, day.date)),
+                        background: getStatusGradient(getUserHabitCompletionStatus(habit, user.id, day.date)),
                         flex: 1
                       }"
                       :title="`${user.name}: ${getUserHabitCompletionStatus(habit, user.id, day.date)}`"
@@ -991,8 +1032,8 @@ onUnmounted(() => {
                 <div
                   v-if="day.habits.length > 2"
                   :class="[
-                    'px-1 md:px-1.5 py-0.5 text-xs cursor-pointer hover:text-gray-700 truncate',
-                    day.isCurrentMonth ? 'text-gray-500' : 'text-gray-400'
+                    'px-1 md:px-1.5 py-0.5 text-xs cursor-pointer hover:text-text-secondary truncate',
+                    day.isCurrentMonth ? 'text-text-secondary' : 'text-text-tertiary'
                   ]"
                 >
                   +{{ day.habits.length - 2 }}

@@ -32,10 +32,10 @@ const userName = computed(() => {
   <AppLayout title="Dashboard">
     <div class="flex items-center justify-center min-h-[60vh]">
       <div class="text-center">
-        <h1 class="text-3xl font-medium text-gray-900 mb-2">
+        <h1 class="text-h1 font-bold text-text-primary tracking-wide-modern mb-2">
           {{ greeting }}, {{ userName }}
         </h1>
-        <p class="text-sm text-gray-500">
+        <p class="text-base text-text-secondary">
           Welcome back
         </p>
       </div>

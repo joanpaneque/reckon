@@ -46,7 +46,7 @@ const handleDeleteCancel = () => {
   <AppLayout title="Work orders">
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-medium text-gray-900">Work orders</h1>
+        <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">Work orders</h1>
         <LinkButton prefetch :href="route('work-orders.create')" variant="primary">
           Create work order
         </LinkButton>
@@ -54,7 +54,7 @@ const handleDeleteCancel = () => {
 
       <Card>
         <div class="space-y-4">
-          <div v-for="workOrder in workOrders.data" :key="workOrder.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+          <div v-for="workOrder in workOrders.data" :key="workOrder.id" class="flex items-center justify-between py-3 border-b border-dark-border last:border-b-0">
             <div class="flex-1">
               <LinkButton prefetch :href="route('work-orders.show', workOrder.id)" variant="secondary">
                 {{ workOrder.name }}
@@ -75,7 +75,7 @@ const handleDeleteCancel = () => {
           </div>
         </div>
 
-        <div v-if="workOrders.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-gray-100">
+        <div v-if="workOrders.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-dark-border">
           <template v-for="link in workOrders.links" :key="link.label">
             <LinkButton
               v-if="link.url"
@@ -84,16 +84,16 @@ const handleDeleteCancel = () => {
               size="sm"
               v-html="link.label"
             />
-            <span v-else class="px-3 py-1 text-sm text-gray-400" v-html="link.label" />
+            <span v-else class="px-3 py-1 text-sm text-text-tertiary" v-html="link.label" />
           </template>
         </div>
       </Card>
 
       <div class="mt-8">
-        <h2 class="text-xl font-medium text-gray-900 mb-4">Shared with me</h2>
+        <h2 class="text-xl font-semibold text-text-primary mb-4">Shared with me</h2>
         <Card>
           <div class="space-y-4">
-            <div v-for="workOrder in sharedWorkOrders.data" :key="workOrder.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+            <div v-for="workOrder in sharedWorkOrders.data" :key="workOrder.id" class="flex items-center justify-between py-3 border-b border-dark-border last:border-b-0">
               <div class="flex-1">
                 <LinkButton prefetch :href="route('work-orders.show', workOrder.id)" variant="secondary">
                   {{ workOrder.name }}
@@ -109,7 +109,7 @@ const handleDeleteCancel = () => {
             </div>
           </div>
 
-          <div v-if="sharedWorkOrders.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-gray-100">
+          <div v-if="sharedWorkOrders.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-dark-border">
             <template v-for="link in sharedWorkOrders.links" :key="link.label">
               <LinkButton
                 v-if="link.url"
@@ -118,7 +118,7 @@ const handleDeleteCancel = () => {
                 size="sm"
                 v-html="link.label"
               />
-              <span v-else class="px-3 py-1 text-sm text-gray-400" v-html="link.label" />
+              <span v-else class="px-3 py-1 text-sm text-text-tertiary" v-html="link.label" />
             </template>
           </div>
         </Card>

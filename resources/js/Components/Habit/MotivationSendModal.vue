@@ -113,16 +113,16 @@ const close = () => {
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
     @click.self="close"
   >
-    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div class="card-modern rounded-modern shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-gray-900">Motivate {{ user.name }}</h2>
+      <div class="flex items-center justify-between p-4 border-b border-dark-border">
+        <h2 class="text-xl font-semibold text-text-primary">Motivate {{ user.name }}</h2>
         <button
           @click="close"
           :disabled="isSubmitting"
-          class="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
+          class="p-2 hover:bg-dark-primary rounded-full transition-colors duration-modern disabled:opacity-50"
         >
-          <X :size="20" />
+          <X :size="20" :stroke-width="2" />
         </button>
       </div>
 
@@ -130,36 +130,36 @@ const close = () => {
       <div class="p-4 space-y-4">
         <!-- Message input -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-text-secondary mb-2">
             Motivation message *
           </label>
           <textarea
             v-model="message"
             rows="4"
             :disabled="isSubmitting"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-gray-50"
+            class="input-modern w-full resize-none disabled:opacity-50"
             placeholder="Write a motivational message..."
             maxlength="1000"
           ></textarea>
-          <div class="mt-1 text-xs text-gray-500 text-right">
+          <div class="mt-1 text-xs text-text-secondary text-right">
             {{ message.length }} / 1000
           </div>
         </div>
 
         <!-- Image upload -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-text-secondary mb-2">
             Image (optional)
           </label>
-          
+
           <!-- Upload button -->
           <label
             v-if="!imagePreview"
-            class="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+            class="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-dark-input-border rounded-modern cursor-pointer hover:border-accent hover:bg-accent/10 transition-colors duration-modern"
             :class="{ 'opacity-50 cursor-not-allowed': isSubmitting }"
           >
-            <Upload :size="20" class="text-gray-500" />
-            <span class="text-sm text-gray-600">Upload image</span>
+            <Upload :size="20" :stroke-width="2" class="text-text-secondary" />
+            <span class="text-sm text-text-secondary">Upload image</span>
             <input
               type="file"
               accept="image/*"
@@ -174,18 +174,18 @@ const close = () => {
             <img
               :src="imagePreview"
               alt="Preview"
-              class="w-full rounded-lg border border-gray-300 cursor-pointer hover:opacity-90 transition-opacity"
+              class="w-full rounded-modern border border-dark-border cursor-pointer hover:opacity-90 transition-opacity duration-modern"
               style="max-height: 200px; object-fit: contain;"
               @click="showImageViewer = true"
             />
             <button
               @click="removeImage"
               :disabled="isSubmitting"
-              class="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50 shadow-lg"
+              class="absolute top-2 right-2 p-2 bg-red-600 text-text-primary rounded-full hover:bg-red-700 transition-colors duration-modern disabled:opacity-50 shadow-lg"
             >
-              <X :size="16" />
+              <X :size="16" :stroke-width="2" />
             </button>
-            <div class="mt-1 text-xs text-gray-500 text-center">
+            <div class="mt-1 text-xs text-text-secondary text-center">
               Click on image to enlarge
             </div>
           </div>
@@ -193,20 +193,20 @@ const close = () => {
       </div>
 
       <!-- Footer -->
-      <div class="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
+      <div class="flex items-center justify-end gap-3 p-4 border-t border-dark-border">
         <button
           @click="close"
           :disabled="isSubmitting"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+          class="px-4 py-2 text-sm font-medium text-text-primary bg-dark-primary hover:bg-dark-border rounded-modern transition-colors duration-modern disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           @click="handleSubmit"
           :disabled="isSubmitting || !message.trim()"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          <Send :size="16" />
+          <Send :size="16" :stroke-width="2" />
           {{ isSubmitting ? 'Sending...' : 'Send motivation' }}
         </button>
       </div>
@@ -220,14 +220,14 @@ const close = () => {
     >
       <button
         @click="showImageViewer = false"
-        class="absolute top-4 right-4 p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+        class="absolute top-4 right-4 p-2 bg-accent hover:bg-accent-hover rounded-full transition-colors duration-modern"
       >
-        <X :size="24" />
+        <X :size="24" :stroke-width="2" class="text-dark-primary" />
       </button>
       <img
         :src="imagePreview"
         alt="Preview"
-        class="max-w-full max-h-full rounded-lg"
+        class="max-w-full max-h-full rounded-modern"
         @click.stop
       />
     </div>

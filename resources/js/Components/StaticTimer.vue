@@ -27,5 +27,5 @@ const duration = computed(() => {
 </script>
 
 <template>
-  <span class="font-mono text-sm text-gray-900">{{ duration }}</span>
+  <span class="font-mono text-sm text-text-primary">{{ duration }}</span>
 </template>

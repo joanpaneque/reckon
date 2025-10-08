@@ -36,7 +36,7 @@ const closeMobileMenu = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white flex">
+  <div class="min-h-screen bg-dark-primary flex">
     <!-- Mobile menu overlay -->
     <div
       v-if="mobileMenuOpen"
@@ -46,19 +46,19 @@ const closeMobileMenu = () => {
 
     <!-- Sidebar -->
     <aside
-      class="w-48 bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0"
+      class="w-48 bg-dark-primary border-r border-dark-border fixed inset-y-0 left-0 z-50 transform transition-transform duration-modern ease-in-out md:relative md:translate-x-0"
       :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'"
     >
-      <div class="px-4 py-4 border-b border-gray-200 h-16 flex items-center justify-between">
+      <div class="px-4 py-4 border-b border-dark-border h-16 flex items-center justify-between">
         <Link
-           prefetch :href="route('index')" class="text-lg font-medium text-gray-900">
+           prefetch :href="route('index')" class="text-lg font-semibold text-text-primary tracking-wide-modern">
           Reckon
         </Link>
         <button
           @click="closeMobileMenu"
-          class="md:hidden text-gray-700 hover:text-gray-900"
+          class="md:hidden text-text-secondary hover:text-accent transition-colors duration-modern"
         >
-          <X :size="20" />
+          <X :size="20" :stroke-width="2" />
         </button>
       </div>
 
@@ -67,40 +67,40 @@ const closeMobileMenu = () => {
            prefetch
           :href="route('index')"
           @click="closeMobileMenu"
-          class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
-          :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('index') }"
+          class="nav-link flex items-center gap-2 px-4 py-3 text-sm border-b border-dark-border"
+          :class="{ 'nav-link-active': route().current('index') }"
         >
-          <Home :size="16" />
+          <Home :size="20" :stroke-width="2" />
           Home
         </Link>
         <Link
            prefetch
           :href="route('work-orders.index')"
           @click="closeMobileMenu"
-          class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
-          :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('work-orders.*') }"
+          class="nav-link flex items-center gap-2 px-4 py-3 text-sm border-b border-dark-border"
+          :class="{ 'nav-link-active': route().current('work-orders.*') }"
         >
-          <ClipboardList :size="16" />
+          <ClipboardList :size="20" :stroke-width="2" />
           Work orders
         </Link>
         <Link
            prefetch
           :href="route('friends.index')"
           @click="closeMobileMenu"
-          class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
-          :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('friends.*') }"
+          class="nav-link flex items-center gap-2 px-4 py-3 text-sm border-b border-dark-border"
+          :class="{ 'nav-link-active': route().current('friends.*') }"
         >
-          <Users :size="16" />
+          <Users :size="20" :stroke-width="2" />
           Friends
         </Link>
         <Link
            prefetch
           :href="route('habits.index')"
           @click="closeMobileMenu"
-          class="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 border-b border-gray-200"
-          :class="{ 'text-gray-900 underline decoration-dotted decoration-2 underline-offset-4': route().current('habits.*') }"
+          class="nav-link flex items-center gap-2 px-4 py-3 text-sm border-b border-dark-border"
+          :class="{ 'nav-link-active': route().current('habits.*') }"
         >
-          <Calendar :size="16" />
+          <Calendar :size="20" :stroke-width="2" />
           Habits
         </Link>
       </nav>
@@ -108,17 +108,17 @@ const closeMobileMenu = () => {
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col w-full md:w-auto">
-      <header class="border-b border-gray-200">
+      <header class="border-b border-dark-border bg-dark-primary shadow-[0_1px_0_#222]">
         <div class="px-4 md:px-6 py-4 h-16 flex items-center justify-between md:justify-end">
           <button
             @click="mobileMenuOpen = true"
-            class="md:hidden text-gray-700 hover:text-gray-900"
+            class="md:hidden text-text-secondary hover:text-accent transition-colors duration-modern"
           >
-            <Menu :size="24" />
+            <Menu :size="24" :stroke-width="2" />
           </button>
 
           <div class="flex items-center gap-2 md:gap-4">
-            <span class="text-xs md:text-sm text-gray-600 truncate max-w-[120px] md:max-w-none">
+            <span class="text-xs md:text-sm text-text-secondary truncate max-w-[120px] md:max-w-none">
               {{ page.props.auth.user?.email }}
             </span>
             <Button @click="logout" variant="secondary" size="sm">

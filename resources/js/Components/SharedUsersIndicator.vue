@@ -39,10 +39,10 @@ const tooltipText = computed(() => {
 <template>
   <div
     v-if="filteredUsers.length > 0"
-    class="flex items-center gap-1 bg-gray-700 text-white px-1.5 py-0.5 cursor-default select-none"
+    class="flex items-center gap-1 bg-dark-secondary border border-dark-border text-text-primary px-2 py-1 rounded-modern cursor-default select-none"
     :title="tooltipText"
   >
-    <Users :size="14" />
+    <Users :size="16" :stroke-width="2" />
     <span class="text-xs">{{ totalUserCount }}</span>
   </div>
 </template>

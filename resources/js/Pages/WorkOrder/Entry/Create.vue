@@ -40,8 +40,8 @@ const submit = () => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-gray-900">Create entry</h1>
-          <p class="text-sm text-gray-500 mt-1">{{ workOrder.name }}</p>
+          <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">Create entry</h1>
+          <p class="text-sm text-text-secondary mt-1">{{ workOrder.name }}</p>
         </div>
         <LinkButton :href="route('work-orders.show', workOrder.id)" variant="secondary">
           Back to work order
@@ -51,30 +51,30 @@ const submit = () => {
       <Card>
         <form @submit.prevent="submit" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <label class="block text-sm font-medium text-text-secondary mb-1">Name</label>
             <Input v-model="form.name" :error="form.errors.name" />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+            <label class="block text-sm font-medium text-text-secondary mb-1">Description (optional)</label>
             <Textarea v-model="form.description" :error="form.errors.description" />
           </div>
 
           <div>
             <label class="flex items-center">
               <input v-model="startNow" type="checkbox" class="mr-2" />
-              <span class="text-sm font-medium text-gray-700">Start entry now</span>
+              <span class="text-sm font-medium text-text-secondary">Start entry now</span>
             </label>
           </div>
 
           <div v-if="!startNow" class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Started At</label>
+              <label class="block text-sm font-medium text-text-secondary mb-1">Started At</label>
               <Input v-model="form.started_at" type="datetime-local" :error="form.errors.started_at" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Ended At</label>
+              <label class="block text-sm font-medium text-text-secondary mb-1">Ended At</label>
               <Input v-model="form.ended_at" type="datetime-local" :error="form.errors.ended_at" />
             </div>
           </div>

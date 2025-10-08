@@ -52,10 +52,10 @@ const getFriendInfo = (friendship) => {
 
 // Helper to get status badge class
 const getStatusBadgeClass = (status) => {
-  if (status === 'accepted') return 'bg-green-100 text-green-800';
-  if (status === 'pending') return 'bg-yellow-100 text-yellow-800';
-  if (status === 'rejected') return 'bg-red-100 text-red-800';
-  return 'bg-gray-100 text-gray-800';
+  if (status === 'accepted') return 'bg-green-500/20 text-green-400';
+  if (status === 'pending') return 'bg-yellow-500/20 text-yellow-400';
+  if (status === 'rejected') return 'bg-red-500/20 text-red-400';
+  return 'bg-text-tertiary/20 text-text-tertiary';
 };
 
 // Helper to get status text
@@ -69,7 +69,7 @@ const getStatusText = (status) => {
   <AppLayout title="Friends">
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-medium text-gray-900">Friends</h1>
+        <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">Friends</h1>
         <LinkButton prefetch :href="route('friends.create')" variant="primary">
           Add friend
         </LinkButton>
@@ -77,7 +77,7 @@ const getStatusText = (status) => {
 
       <Card>
         <div class="space-y-4">
-          <div v-for="friendship in incomingAndFriends.data" :key="friendship.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+          <div v-for="friendship in incomingAndFriends.data" :key="friendship.id" class="flex items-center justify-between py-3 border-b border-dark-border last:border-b-0">
             <div class="flex-1 flex items-center gap-3">
               <LinkButton prefetch :href="route('friends.show', friendship.id)" variant="secondary">
                 {{ getFriendInfo(friendship) }}
@@ -104,12 +104,12 @@ const getStatusText = (status) => {
             </div>
           </div>
 
-          <div v-if="incomingAndFriends.data.length === 0" class="text-center py-8 text-gray-500">
+          <div v-if="incomingAndFriends.data.length === 0" class="text-center py-8 text-text-secondary">
             No friends yet. Add some friends to get started!
           </div>
         </div>
 
-        <div v-if="incomingAndFriends.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-gray-100">
+        <div v-if="incomingAndFriends.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-dark-border">
           <template v-for="link in incomingAndFriends.links" :key="link.label">
             <LinkButton
               v-if="link.url"
@@ -118,7 +118,7 @@ const getStatusText = (status) => {
               size="sm"
               v-html="link.label"
             />
-            <span v-else class="px-3 py-1 text-sm text-gray-400" v-html="link.label" />
+            <span v-else class="px-3 py-1 text-sm text-text-tertiary" v-html="link.label" />
           </template>
         </div>
       </Card>

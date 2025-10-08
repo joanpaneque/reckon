@@ -91,12 +91,12 @@ const submit = () => {
 <template>
   <form @submit.prevent="submit" class="space-y-6">
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">Name</label>
       <Input v-model="form.name" :error="form.errors.name" />
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Hour Price (€)</label>
+      <label class="block text-sm font-medium text-text-secondary mb-1">Hour Price (€)</label>
       <Input
         v-model="form.hour_price"
         :error="form.errors.hour_price"
@@ -107,12 +107,12 @@ const submit = () => {
     </div>
 
     <!-- Share with friends section -->
-    <div class="border-t pt-6">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Share with friends</h3>
+    <div class="border-t border-dark-border pt-6">
+      <h3 class="text-lg font-semibold text-text-primary mb-4">Share with friends</h3>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+          <label class="block text-sm font-medium text-text-secondary mb-1">
             Add friend
           </label>
           <AutocompleteInput
@@ -135,16 +135,16 @@ const submit = () => {
           <div
             v-for="(friend, index) in form.shared_with"
             :key="friend.email"
-            class="flex items-center gap-3 p-3 border border-gray-200 hover:border-gray-300 transition-colors"
+            class="flex items-center gap-3 p-3 border border-dark-border rounded-modern hover:border-accent transition-colors duration-modern"
           >
             <div class="flex-1">
-              <p class="text-sm font-medium text-gray-900">{{ friend.name }}</p>
-              <p class="text-xs text-gray-500">{{ friend.email }}</p>
+              <p class="text-sm font-medium text-text-primary">{{ friend.name }}</p>
+              <p class="text-xs text-text-secondary">{{ friend.email }}</p>
             </div>
 
             <select
               v-model="friend.permission"
-              class="py-1.5 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="input-modern py-1.5 text-sm"
             >
               <option value="view">View</option>
               <option value="edit">Edit</option>
@@ -153,7 +153,7 @@ const submit = () => {
             <button
               type="button"
               @click="removeFriend(index)"
-              class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+              class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-600/10 rounded-modern transition-colors duration-modern"
             >
               Remove
             </button>
@@ -162,7 +162,7 @@ const submit = () => {
       </div>
     </div>
 
-    <div class="flex justify-end pt-4 border-t">
+    <div class="flex justify-end pt-4 border-t border-dark-border">
       <Button type="submit" :disabled="form.processing">
         {{ submitLabel }}
       </Button>

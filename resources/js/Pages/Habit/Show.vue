@@ -35,11 +35,11 @@ const formatDate = (date) => {
 
 const getFrequencyBadgeColor = (frequency) => {
   const colors = {
-    everyday: 'bg-green-100 text-green-800',
-    weekdays: 'bg-blue-100 text-blue-800',
-    weekends: 'bg-purple-100 text-purple-800',
+    everyday: 'bg-green-500/20 text-green-400',
+    weekdays: 'bg-accent/20 text-accent',
+    weekends: 'bg-purple-500/20 text-purple-400',
   };
-  return colors[frequency] || 'bg-gray-100 text-gray-800';
+  return colors[frequency] || 'bg-text-tertiary/20 text-text-tertiary';
 };
 
 const daysSinceStart = computed(() => {
@@ -54,7 +54,7 @@ const isActive = computed(() => {
   const now = new Date();
   const start = new Date(props.habit.start_date);
   const end = new Date(props.habit.end_date);
-  
+
   return now >= start && now <= end;
 });
 </script>
@@ -64,15 +64,15 @@ const isActive = computed(() => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-gray-900 flex items-center gap-3">
+          <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern flex items-center gap-3">
             {{ habit.name }}
             <span :class="getFrequencyBadgeColor(habit.frequency)" class="px-3 py-1 text-sm font-medium rounded-full">
               {{ habit.frequency }}
             </span>
-            <span v-if="isActive" class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+            <span v-if="isActive" class="px-3 py-1 text-sm font-medium rounded-full bg-green-500/20 text-green-400">
               Active
             </span>
-            <span v-else class="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-800">
+            <span v-else class="px-3 py-1 text-sm font-medium rounded-full bg-text-tertiary/20 text-text-tertiary">
               Inactive
             </span>
           </h1>

@@ -32,17 +32,17 @@ const submit = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white flex items-center justify-center px-4">
+  <div class="min-h-screen bg-dark-primary flex items-center justify-center px-4">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <h1 class="text-2xl font-medium text-gray-900">Create account</h1>
-        <p class="mt-2 text-sm text-gray-600">Sign up to get started</p>
+        <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">Create account</h1>
+        <p class="mt-2 text-sm text-text-secondary">Sign up to get started</p>
       </div>
 
       <Card>
         <form @submit.prevent="submit" class="space-y-6">
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="name" class="block text-sm font-medium text-text-secondary mb-1">
               Your name
             </label>
             <Input
@@ -56,7 +56,7 @@ const submit = () => {
           </div>
 
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="email" class="block text-sm font-medium text-text-secondary mb-1">
               Email
             </label>
             <Input
@@ -70,7 +70,7 @@ const submit = () => {
           </div>
 
           <div>
-            <label for="email_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="email_confirmation" class="block text-sm font-medium text-text-secondary mb-1">
               Confirm email
             </label>
             <Input
@@ -84,7 +84,7 @@ const submit = () => {
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="password" class="block text-sm font-medium text-text-secondary mb-1">
               Password
             </label>
             <Input
@@ -106,9 +106,9 @@ const submit = () => {
             {{ form.processing ? 'Creating account...' : 'Create account' }}
           </Button>
 
-          <div class="text-center text-sm text-gray-600">
+          <div class="text-center text-sm text-text-secondary">
             Already have an account?
-            <a :href="route('login')" class="text-gray-900 font-medium hover:underline">
+            <a :href="route('login')" class="text-accent font-medium hover:underline">
               Sign in
             </a>
           </div>

@@ -61,33 +61,43 @@ const getContrastColor = (hexColor) => {
 <template>
   <AppLayout title="Habits">
     <div class="space-y-4 md:space-y-6">
-      <!-- Header -->
-      <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <h1 class="text-xl md:text-2xl font-medium text-gray-900">Habits</h1>
+      <!-- Header - Desktop only -->
+      <div class="hidden md:flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h1 class="text-xl md:text-h2 font-bold text-text-primary tracking-wide-modern">Habits</h1>
         <div class="flex gap-2 md:gap-3">
           <LinkButton prefetch :href="route('shared-habits.index')" variant="secondary" size="sm" class="flex-1 md:flex-none">
-            <span class="md:hidden">Shared</span>
             <span class="hidden md:inline">Shared Habits</span>
           </LinkButton>
           <LinkButton prefetch :href="route('habits.create')" variant="primary" size="sm" class="flex-1 md:flex-none">
-            <span class="md:hidden">Create</span>
             <span class="hidden md:inline">Create habit</span>
           </LinkButton>
         </div>
       </div>
 
       <!-- Calendar View -->
-      <Card>
-        <HabitCalendar :habits="habits" />
-      </Card>
+      <div class="-mx-4 md:mx-0">
+        <Card class="!p-0 md:!p-6 md:rounded-modern rounded-none md:border border-none md:shadow-modern shadow-none">
+          <HabitCalendar :habits="habits" />
+        </Card>
+      </div>
+
+      <!-- Mobile buttons - Below calendar, mobile only -->
+      <div class="md:hidden px-4 flex gap-2">
+        <LinkButton prefetch :href="route('shared-habits.index')" variant="secondary" size="sm" class="flex-1">
+          Shared
+        </LinkButton>
+        <LinkButton prefetch :href="route('habits.create')" variant="primary" size="sm" class="flex-1">
+          Create
+        </LinkButton>
+      </div>
 
       <!-- List View - Only show on desktop -->
       <Card title="All Habits" class="hidden md:block">
-        <div v-if="habits.length === 0" class="text-center py-8 text-gray-500">
+        <div v-if="habits.length === 0" class="text-center py-8 text-text-secondary">
           No habits found. Create your first habit to get started!
         </div>
         <div v-else class="space-y-4">
-          <div v-for="habit in habits" :key="habit.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+          <div v-for="habit in habits" :key="habit.id" class="flex items-center justify-between py-3 border-b border-dark-border last:border-b-0">
             <div class="flex-1">
               <LinkButton prefetch :href="route('habits.show', habit.id)" variant="secondary">
                 {{ habit.name }}
@@ -99,12 +109,12 @@ const getContrastColor = (hexColor) => {
                 >
                   {{ habit.frequency }}
                 </span>
-                <span class="text-sm text-gray-500">
+                <span class="text-sm text-text-secondary">
                   {{ formatDate(habit.start_date) }} - {{ formatDate(habit.end_date) }}
                 </span>
                 <SharedUsersIndicator v-if="habit.shared_with" :shared-with="habit.shared_with" />
               </div>
-              <div v-if="habit.description" class="mt-1 text-sm text-gray-600">
+              <div v-if="habit.description" class="mt-1 text-sm text-text-secondary">
                 {{ habit.description }}
               </div>
             </div>

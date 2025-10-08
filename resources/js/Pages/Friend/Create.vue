@@ -19,7 +19,7 @@ const submit = () => {
   <AppLayout title="Add friend">
     <div class="space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-medium text-gray-900">Add friend</h1>
+        <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">Add friend</h1>
         <LinkButton prefetch :href="route('friends.index')" variant="secondary">
           Back to list
         </LinkButton>
@@ -28,14 +28,14 @@ const submit = () => {
       <Card>
         <form @submit.prevent="submit" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Friend's Email</label>
+            <label class="block text-sm font-medium text-text-secondary mb-1">Friend's Email</label>
             <Input
               v-model="form.email"
               :error="form.errors.email"
               type="email"
               placeholder="friend@example.com"
             />
-            <p class="mt-1 text-sm text-gray-500">
+            <p class="mt-1 text-sm text-text-secondary">
               Enter the email address of the person you want to add as a friend.
             </p>
           </div>

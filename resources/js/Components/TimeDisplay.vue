@@ -36,19 +36,20 @@ const formattedCost = computed(() => {
 </script>
 
 <template>
-  <div v-if="compact" class="text-sm text-gray-600">
+  <div v-if="compact" class="text-sm text-text-secondary">
     <span class="font-mono">{{ formattedTime }}</span> • {{ formattedCost }}
   </div>
   <div v-else class="space-y-2">
     <div>
-      <span class="text-sm text-gray-600">Time: </span>
-      <span class="font-mono text-gray-900">{{ formattedTime }}</span>
+      <span class="text-sm text-text-secondary">Time: </span>
+      <span class="font-mono text-text-primary">{{ formattedTime }}</span>
     </div>
     <div>
-      <span class="text-sm text-gray-600">Cost: </span>
-      <span class="font-semibold text-gray-900">{{ formattedCost }}</span>
+      <span class="text-sm text-text-secondary">Cost: </span>
+      <span class="font-semibold text-text-primary">{{ formattedCost }}</span>
     </div>
   </div>
 </template>
+
 
 

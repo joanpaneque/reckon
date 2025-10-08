@@ -36,8 +36,8 @@ const stopTimer = (entryId) => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-gray-900">{{ workOrderEntry.name }}</h1>
-          <p class="text-sm text-gray-500 mt-1">{{ workOrder.name }}</p>
+          <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">{{ workOrderEntry.name }}</h1>
+          <p class="text-sm text-text-secondary mt-1">{{ workOrder.name }}</p>
         </div>
         <LinkButton prefetch :href="route('work-orders.show', workOrder.id)" variant="secondary">
           Back to work order
@@ -47,19 +47,19 @@ const stopTimer = (entryId) => {
       <Card title="Entry Details">
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700">Description</label>
-            <p class="mt-1 text-sm text-gray-900">{{ workOrderEntry.description || 'No description provided' }}</p>
+            <label class="block text-sm font-medium text-text-secondary">Description</label>
+            <p class="mt-1 text-sm text-text-primary">{{ workOrderEntry.description || 'No description provided' }}</p>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Started At</label>
-              <p class="mt-1 text-sm text-gray-900">{{ workOrderEntry.started_at || 'Not started' }}</p>
+              <label class="block text-sm font-medium text-text-secondary">Started At</label>
+              <p class="mt-1 text-sm text-text-primary">{{ workOrderEntry.started_at || 'Not started' }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">Ended At</label>
-              <p class="mt-1 text-sm text-gray-900">{{ workOrderEntry.ended_at || 'Not finished' }}</p>
+              <label class="block text-sm font-medium text-text-secondary">Ended At</label>
+              <p class="mt-1 text-sm text-text-primary">{{ workOrderEntry.ended_at || 'Not finished' }}</p>
             </div>
           </div>
 
@@ -68,7 +68,7 @@ const stopTimer = (entryId) => {
             <StaticTimer v-if="workOrderEntry.started_at && workOrderEntry.ended_at" :started-at="workOrderEntry.started_at" :ended-at="workOrderEntry.ended_at" />
           </div>
 
-          <div v-if="canEdit" class="flex items-center gap-2 pt-4 border-t border-gray-100">
+          <div v-if="canEdit" class="flex items-center gap-2 pt-4 border-t border-dark-border">
             <LinkButton
               v-if="workOrderEntry.started_at && !workOrderEntry.ended_at"
               @click="stopTimer(workOrderEntry.id)"

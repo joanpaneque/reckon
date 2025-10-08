@@ -34,16 +34,16 @@ const formattedCost = computed(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 border border-gray-200 p-4">
-    <h3 class="text-lg font-medium text-gray-900 mb-3">Project summary</h3>
+  <div class="card-modern">
+    <h3 class="text-lg font-semibold text-text-primary mb-3">Project summary</h3>
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700">Total time completed</label>
-        <p class="mt-1 text-lg font-mono text-gray-900">{{ formattedTime }}</p>
+        <label class="block text-sm font-medium text-text-secondary">Total time completed</label>
+        <p class="mt-1 text-lg font-mono text-text-primary">{{ formattedTime }}</p>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Total cost ({{ hourPrice }}€/hour)</label>
-        <p class="mt-1 text-lg font-semibold text-gray-900">{{ formattedCost }}</p>
+        <label class="block text-sm font-medium text-text-secondary">Total cost ({{ hourPrice }}€/hour)</label>
+        <p class="mt-1 text-lg font-semibold text-accent">{{ formattedCost }}</p>
       </div>
     </div>
   </div>

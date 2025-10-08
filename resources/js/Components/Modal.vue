@@ -60,10 +60,10 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition
-      enter-active-class="transition-opacity duration-200"
+      enter-active-class="transition-opacity duration-modern"
       enter-from-class="opacity-0"
       enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200"
+      leave-active-class="transition-opacity duration-modern"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
@@ -76,17 +76,17 @@ onUnmounted(() => {
 
         <!-- Modal -->
         <Transition
-          enter-active-class="transition-all duration-200"
+          enter-active-class="transition-all duration-modern"
           enter-from-class="opacity-0 scale-95"
           enter-to-class="opacity-100 scale-100"
-          leave-active-class="transition-all duration-200"
+          leave-active-class="transition-all duration-modern"
           leave-from-class="opacity-100 scale-100"
           leave-to-class="opacity-0 scale-95"
         >
-          <div v-if="show" class="relative bg-white border border-gray-200 p-6 max-w-md w-full mx-4">
+          <div v-if="show" class="relative card-modern max-w-md w-full mx-4">
             <div class="mb-4">
-              <h3 class="text-lg font-medium text-gray-900 mb-2">{{ title }}</h3>
-              <p class="text-sm text-gray-600">{{ message }}</p>
+              <h3 class="text-lg font-semibold text-text-primary mb-2">{{ title }}</h3>
+              <p class="text-sm text-text-secondary">{{ message }}</p>
             </div>
 
             <div class="flex items-center justify-end gap-3">

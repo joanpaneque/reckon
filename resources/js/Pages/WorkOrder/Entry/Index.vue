@@ -36,8 +36,8 @@ const stopTimer = (entryId) => {
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-gray-900">{{ workOrder.name }}</h1>
-          <p class="text-sm text-gray-500 mt-1">Work Order Entries</p>
+          <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern">{{ workOrder.name }}</h1>
+          <p class="text-sm text-text-secondary mt-1">Work Order Entries</p>
         </div>
         <LinkButton prefetch :href="route('work-orders.entries.create', workOrder.id)" variant="primary">
           Create new entry
@@ -46,7 +46,7 @@ const stopTimer = (entryId) => {
 
       <Card>
         <div class="space-y-4">
-          <div v-for="entry in workOrderEntries.data" :key="entry.id" class="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+          <div v-for="entry in workOrderEntries.data" :key="entry.id" class="flex items-center justify-between py-3 border-b border-dark-border last:border-b-0">
             <div class="flex items-center gap-4">
               <LinkButton prefetch :href="route('work-orders.entries.show', [workOrder.id, entry.id])" variant="secondary">
                 {{ entry.name }}
@@ -73,7 +73,7 @@ const stopTimer = (entryId) => {
           </div>
         </div>
 
-        <div v-if="workOrderEntries.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-gray-100">
+        <div v-if="workOrderEntries.links" class="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-dark-border">
           <template v-for="link in workOrderEntries.links" :key="link.label">
             <LinkButton
               v-if="link.url"
@@ -82,7 +82,7 @@ const stopTimer = (entryId) => {
               size="sm"
               v-html="link.label"
             />
-            <span v-else class="px-3 py-1 text-sm text-gray-400" v-html="link.label" />
+            <span v-else class="px-3 py-1 text-sm text-text-tertiary" v-html="link.label" />
           </template>
         </div>
       </Card>
