@@ -817,20 +817,25 @@ onUnmounted(() => {
               isHabitCompleted(habit, currentDate) ? 'border-green-500/60' : 'border-white/10'
             ]"
           >
-            <!-- Row 1: Clickable habit container -->
+            <!-- Row 1: Habit container -->
             <div
-              class="group hover:scale-[1.005] transition-all duration-modern cursor-pointer p-2 md:p-3 relative shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)] hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15),0_4px_12px_rgba(0,0,0,0.3)]"
-              :class="isToday(currentDate) ? 'hover:border-accent' : ''"
+              class="group transition-all duration-modern p-2 md:p-3 relative shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
               :style="getHabitGradientStyle(habit)"
-              @click="isToday(currentDate) ? handleHabitToggle(habit, currentDate, !isHabitCompleted(habit, currentDate)) : null"
             >
+              <!-- Clickable area (right 50% only) -->
+              <div
+                v-if="isToday(currentDate)"
+                class="absolute top-0 right-0 w-1/2 h-full cursor-pointer hover:bg-white/5 transition-all duration-modern z-10"
+                @click="handleHabitToggle(habit, currentDate, !isHabitCompleted(habit, currentDate))"
+              />
+
               <!-- Visual indicator for clickability -->
-              <div v-if="isToday(currentDate)" class="absolute top-2 right-2 md:top-3 md:right-3 transition-all duration-modern">
+              <div v-if="isToday(currentDate)" class="absolute top-2 right-2 md:top-3 md:right-3 transition-all duration-modern pointer-events-none z-20">
                 <div
                   v-if="isHabitCompleted(habit, currentDate)"
-                  class="w-6 h-6 rounded-full bg-white/40 backdrop-blur-sm border border-white/60 flex items-center justify-center shadow-md"
+                  class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-green-600 to-green-700 border-2 border-green-400 flex items-center justify-center shadow-lg shadow-green-500/50"
                 >
-                  <Check :size="16" :stroke-width="3" class="text-white drop-shadow-md" />
+                  <Check :size="18" :stroke-width="3.5" class="text-white drop-shadow-lg" />
                 </div>
                 <div
                   v-else
@@ -838,9 +843,9 @@ onUnmounted(() => {
                 />
               </div>
 
-              <div class="flex items-start gap-2 md:gap-3 pr-8">
+              <div class="flex items-start gap-2 md:gap-3 pr-8 relative">
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-sm md:text-base font-semibold text-text-primary mb-1 group-hover:text-accent transition-colors duration-modern">
+                  <h3 class="text-sm md:text-base font-semibold text-text-primary mb-1 transition-colors duration-modern">
                     {{ habit.name }}
                   </h3>
                   <div class="mt-1 flex items-center gap-1.5 md:gap-2 flex-wrap">
@@ -850,7 +855,7 @@ onUnmounted(() => {
                     <!-- Upload media button (only if completed and today) -->
                     <label
                       v-if="isToday(currentDate) && isHabitCompleted(habit, currentDate) && !hasMediaForToday(habit, currentDate)"
-                      class="flex items-center gap-1.5 bg-white/5 border border-white/20 text-text-secondary hover:bg-white/10 hover:border-white/30 px-2.5 py-1.5 rounded-modern cursor-pointer transition-all duration-modern hover:scale-105 hover:shadow-lg"
+                      class="flex items-center gap-1.5 bg-white/5 border border-white/20 text-text-secondary hover:bg-white/10 hover:border-white/30 px-2.5 py-1.5 rounded-modern cursor-pointer transition-all duration-modern hover:scale-105 hover:shadow-lg relative z-30"
                       @click.stop
                     >
                       <Upload :size="16" :stroke-width="2" />
@@ -867,7 +872,7 @@ onUnmounted(() => {
                     <button
                       v-if="isToday(currentDate) && isHabitCompleted(habit, currentDate) && hasMediaForToday(habit, currentDate)"
                       @click.stop="handleDeleteMedia(habit, currentDate)"
-                      class="flex items-center gap-1.5 bg-red-600/10 border border-red-600/30 text-red-400 hover:bg-red-600/20 hover:border-red-600/50 px-2.5 py-1.5 rounded-modern cursor-pointer transition-all duration-modern hover:scale-105 hover:shadow-lg"
+                      class="flex items-center gap-1.5 bg-red-600/10 border border-red-600/30 text-red-400 hover:bg-red-600/20 hover:border-red-600/50 px-2.5 py-1.5 rounded-modern cursor-pointer transition-all duration-modern hover:scale-105 hover:shadow-lg relative z-30"
                     >
                       <Trash2 :size="16" :stroke-width="2" />
                       <span class="text-xs font-medium hidden sm:inline">Delete media</span>
