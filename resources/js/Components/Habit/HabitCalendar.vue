@@ -5,7 +5,7 @@ import SharedUsersIndicator from '@/Components/SharedUsersIndicator.vue';
 import HabitMediaModal from '@/Components/Habit/HabitMediaModal.vue';
 import HabitMediaViewer from '@/Components/Habit/HabitMediaViewer.vue';
 import MotivationSendModal from '@/Components/Habit/MotivationSendModal.vue';
-import { ChevronLeft, ChevronRight, Check, Clock, X, Calendar, ChevronDown, ChevronUp, Upload, Trash2, Heart } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, Check, Clock, X, Calendar, ChevronDown, ChevronUp, Upload, Trash2, Heart, Crown } from 'lucide-vue-next';
 import { router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 
@@ -422,8 +422,18 @@ const getAllHabitUsers = (habit, date) => {
     });
   }
 
-  // Sort users alphabetically by name
-  users.sort((a, b) => a.name.localeCompare(b.name));
+  // Get current user ID
+  const page = usePage();
+  const currentUserId = page.props.auth.user.id;
+
+  // Sort users: current user first, then alphabetically by name
+  users.sort((a, b) => {
+    // Current user always comes first
+    if (a.id === currentUserId) return -1;
+    if (b.id === currentUserId) return 1;
+    // Then sort alphabetically
+    return a.name.localeCompare(b.name);
+  });
 
   return users;
 };
@@ -802,7 +812,10 @@ onUnmounted(() => {
           <div
             v-for="habit in dayViewHabits"
             :key="habit.id"
-            class="flex flex-col gap-0 border-2 border-white/10 rounded-modern overflow-hidden"
+            :class="[
+              'flex flex-col gap-0 border-2 rounded-modern overflow-hidden transition-all duration-modern',
+              isHabitCompleted(habit, currentDate) ? 'border-green-500/60' : 'border-white/10'
+            ]"
           >
             <!-- Row 1: Clickable habit container -->
             <div
@@ -815,9 +828,9 @@ onUnmounted(() => {
               <div v-if="isToday(currentDate)" class="absolute top-2 right-2 md:top-3 md:right-3 transition-all duration-modern">
                 <div
                   v-if="isHabitCompleted(habit, currentDate)"
-                  class="w-6 h-6 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm"
+                  class="w-6 h-6 rounded-full bg-white/40 backdrop-blur-sm border border-white/60 flex items-center justify-center shadow-md"
                 >
-                  <Check :size="16" :stroke-width="3" class="text-white" />
+                  <Check :size="16" :stroke-width="3" class="text-white drop-shadow-md" />
                 </div>
                 <div
                   v-else
@@ -883,6 +896,13 @@ onUnmounted(() => {
                   :is="getStatusIcon(getUserHabitCompletionStatus(habit, user.id, currentDate))"
                   :size="14"
                   :stroke-width="2"
+                />
+                <!-- Crown icon (only for habit owner) -->
+                <Crown
+                  v-if="habit.user && user.id === habit.user.id"
+                  :size="12"
+                  :stroke-width="2"
+                  class="text-yellow-400"
                 />
                 <span class="md:hidden">{{ getUserInitials(user.name) }}</span>
                 <span class="hidden md:inline">{{ user.name }}</span>
