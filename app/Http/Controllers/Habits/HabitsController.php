@@ -145,6 +145,48 @@ class HabitsController extends Controller
     }
 
     /**
+     * Display statistics page.
+     */
+    public function statistics()
+    {
+        // Calculate date range (last 30 days)
+        $maxDate = now()->subDays(1)->format('Y-m-d');
+        $minDate = now()->subDays(30)->format('Y-m-d');
+
+        // Get statistics for current user
+        $currentUserStats = auth()->user()->getHabitStatistics($minDate, $maxDate);
+
+        // Get statistics for friends
+        $friends = auth()->user()->cleanFriends();
+        $friendsStats = [];
+
+        foreach ($friends as $friend) {
+            $friendsStats[] = [
+                'user' => [
+                    'id' => $friend->id,
+                    'name' => $friend->name,
+                    'email' => $friend->email,
+                ],
+                'statistics' => $friend->getHabitStatistics($minDate, $maxDate),
+            ];
+        }
+
+        return Inertia::render('Habit/Statistics', [
+            'currentUser' => [
+                'id' => auth()->user()->id,
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+            ],
+            'currentUserStatistics' => $currentUserStats,
+            'friendsStatistics' => $friendsStats,
+            'dateRange' => [
+                'minDate' => $minDate,
+                'maxDate' => $maxDate,
+            ],
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()

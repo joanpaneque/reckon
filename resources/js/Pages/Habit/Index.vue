@@ -65,6 +65,9 @@ const getContrastColor = (hexColor) => {
       <div class="hidden md:flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h1 class="text-xl md:text-h2 font-bold text-text-primary tracking-wide-modern">Habits</h1>
         <div class="flex gap-2 md:gap-3">
+          <LinkButton prefetch :href="route('habits.statistics')" variant="secondary" size="sm" class="flex-1 md:flex-none">
+            <span class="hidden md:inline">Statistics</span>
+          </LinkButton>
           <LinkButton prefetch :href="route('shared-habits.index')" variant="secondary" size="sm" class="flex-1 md:flex-none">
             <span class="hidden md:inline">Shared Habits</span>
           </LinkButton>
@@ -83,6 +86,9 @@ const getContrastColor = (hexColor) => {
 
       <!-- Mobile buttons - Below calendar, mobile only -->
       <div class="md:hidden px-4 flex gap-2">
+        <LinkButton prefetch :href="route('habits.statistics')" variant="secondary" size="sm" class="flex-1">
+          Stats
+        </LinkButton>
         <LinkButton prefetch :href="route('shared-habits.index')" variant="secondary" size="sm" class="flex-1">
           Shared
         </LinkButton>

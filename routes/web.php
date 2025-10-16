@@ -33,6 +33,7 @@ Route::middleware('App\Http\Middleware\RequireAuth')->group(function () {
     Route::resource('friends', FriendsController::class);
 
     Route::resource('habits', HabitsController::class);
+    Route::get('habits-statistics', [HabitsController::class, 'statistics'])->name('habits.statistics');
 
     // User habits completion routes
     Route::post('habits/{habit}/completion', [UserHabitsController::class, 'createOrUpdate'])->name('habits.completion');
