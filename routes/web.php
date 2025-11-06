@@ -34,6 +34,7 @@ Route::middleware('App\Http\Middleware\RequireAuth')->group(function () {
 
     Route::resource('habits', HabitsController::class);
     Route::get('habits-statistics', [HabitsController::class, 'statistics'])->name('habits.statistics');
+    Route::get('habits-date-range', [HabitsController::class, 'getHabitsForDateRange'])->name('habits.date-range');
 
     // User habits completion routes
     Route::post('habits/{habit}/completion', [UserHabitsController::class, 'createOrUpdate'])->name('habits.completion');

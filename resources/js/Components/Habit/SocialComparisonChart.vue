@@ -62,12 +62,18 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-// Calculate cumulative net score (completed - failed)
+// Calculate cumulative net score based on daily completion percentage
 const calculateCumulativeNet = (statistics) => {
   let cumulative = 0;
   return statistics.map(day => {
-    // Add completed, subtract failed
-    cumulative += (day.habitsCompletedCount - day.habitsFailedCount);
+    // Calculate daily completion percentage
+    const total = day.habitsCompletedCount + day.habitsFailedCount;
+    const percentage = total > 0 ? (day.habitsCompletedCount / total) * 100 : 0;
+
+    // Add daily score: -9 + floor(percentage/10)
+    const dailyScore = -9 + Math.floor(percentage / 10);
+    cumulative += dailyScore;
+
     return cumulative;
   });
 };
@@ -329,7 +335,7 @@ const chartOptions = computed(() => ({
     <!-- Mode description -->
     <div class="text-sm text-text-secondary">
       <span v-if="chartMode === 'net-score'">
-        📊 Cumulative score: +1 for completed, -1 for failed habits
+        📊 Cumulative score: each day adds -9 + floor(completion%/10)
       </span>
       <span v-else-if="chartMode === 'daily'">
         📅 Daily habits completed (not cumulative)

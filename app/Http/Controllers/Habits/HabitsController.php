@@ -14,134 +14,129 @@ class HabitsController extends Controller
      */
     public function index()
     {
+        // For initial load, only get today's data
+        $today = now()->format('Y-m-d');
+        $habits = $this->getHabitsWithDateRange($today, $today);
+
+        return Inertia::render('Habit/Index', [
+            'habits' => $habits,
+        ]);
+    }
+
+    /**
+     * Get habits with user_habits filtered by date range (API endpoint)
+     */
+    public function getHabitsForDateRange(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        $habits = $this->getHabitsWithDateRange(
+            $validated['start_date'],
+            $validated['end_date']
+        );
+
+        return response()->json(['habits' => $habits]);
+    }
+
+    /**
+     * Private helper method to get habits with filtered user_habits
+     */
+    private function getHabitsWithDateRange($startDate, $endDate)
+    {
         // Get user's own habits
         $ownHabits = Habit::where('user_id', auth()->user()->id)
             ->with([
-                'userHabits.user', // Load all user habits with user info
                 'sharedWith',
                 'user' // Load the owner information
             ])
             ->get()
-            ->map(function ($habit) {
-                // Separate current user's habits and all user habits for shared users - explicitly include ID
-                $habit->user_habits = $habit->userHabits
-                    ->where('user_id', auth()->user()->id)
-                    ->map(function ($uh) {
-                        return [
-                            'id' => $uh->id,
-                            'user_id' => $uh->user_id,
-                            'habit_id' => $uh->habit_id,
-                            'completed' => $uh->completed,
-                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
-                            'media_path' => $uh->media_path,
-                            'media_type' => $uh->media_type,
-                            'media_caption' => $uh->media_caption,
-                        ];
-                    })
-                    ->values()
-                    ->toArray();
-
-                $habit->all_user_habits = $habit->userHabits
-                    ->map(function ($uh) {
-                        return [
-                            'id' => $uh->id,
-                            'user_id' => $uh->user_id,
-                            'habit_id' => $uh->habit_id,
-                            'completed' => $uh->completed,
-                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
-                            'media_path' => $uh->media_path,
-                            'media_type' => $uh->media_type,
-                            'media_caption' => $uh->media_caption,
-                        ];
-                    })
-                    ->values()
-                    ->toArray();
-
-                // Add pivot data (joined_at from updated_at) to shared_with users
-                if ($habit->sharedWith && $habit->sharedWith->count() > 0) {
-                    $sharedWithData = $habit->sharedWith->map(function ($user) {
-                        return [
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'joined_at' => $user->pivot->updated_at ? $user->pivot->updated_at->toISOString() : null,
-                        ];
-                    })->values()->toArray();
-
-                    $habit->shared_with = $sharedWithData;
-                    unset($habit->sharedWith); // Remove original relation to avoid confusion
-                }
-
-                return $habit;
+            ->map(function ($habit) use ($startDate, $endDate) {
+                return $this->mapHabitWithDateRange($habit, $startDate, $endDate);
             });
 
         // Get accepted shared habits
         $sharedHabits = auth()->user()->acceptedSharedHabits()
             ->with([
-                'userHabits.user', // Load all user habits with user info
                 'sharedWith',
                 'user' // Load the owner information
             ])
             ->get()
-            ->map(function ($habit) {
-                // Separate current user's habits and all user habits for shared users - explicitly include ID
-                $habit->user_habits = $habit->userHabits
-                    ->where('user_id', auth()->user()->id)
-                    ->map(function ($uh) {
-                        return [
-                            'id' => $uh->id,
-                            'user_id' => $uh->user_id,
-                            'habit_id' => $uh->habit_id,
-                            'completed' => $uh->completed,
-                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
-                            'media_path' => $uh->media_path,
-                            'media_type' => $uh->media_type,
-                            'media_caption' => $uh->media_caption,
-                        ];
-                    })
-                    ->values()
-                    ->toArray();
-
-                $habit->all_user_habits = $habit->userHabits
-                    ->map(function ($uh) {
-                        return [
-                            'id' => $uh->id,
-                            'user_id' => $uh->user_id,
-                            'habit_id' => $uh->habit_id,
-                            'completed' => $uh->completed,
-                            'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
-                            'media_path' => $uh->media_path,
-                            'media_type' => $uh->media_type,
-                            'media_caption' => $uh->media_caption,
-                        ];
-                    })
-                    ->values()
-                    ->toArray();
-
-                // Add pivot data (joined_at from updated_at) to shared_with users
-                if ($habit->sharedWith && $habit->sharedWith->count() > 0) {
-                    $sharedWithData = $habit->sharedWith->map(function ($user) {
-                        return [
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'joined_at' => $user->pivot->updated_at ? $user->pivot->updated_at->toISOString() : null,
-                        ];
-                    })->values()->toArray();
-
-                    $habit->shared_with = $sharedWithData;
-                    unset($habit->sharedWith); // Remove original relation to avoid confusion
-                }
-
-                return $habit;
+            ->map(function ($habit) use ($startDate, $endDate) {
+                return $this->mapHabitWithDateRange($habit, $startDate, $endDate);
             });
 
         // Combine both collections
-        $allHabits = $ownHabits->concat($sharedHabits);
+        return $ownHabits->concat($sharedHabits)->values();
+    }
 
-        return Inertia::render('Habit/Index', [
-            'habits' => $allHabits,
-        ]);
+    /**
+     * Map habit with filtered user_habits by date range
+     */
+    private function mapHabitWithDateRange($habit, $startDate, $endDate)
+    {
+        // Load user habits filtered by date range
+        $userHabits = $habit->userHabits()
+            ->whereBetween('completed_at', [
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59'
+            ])
+            ->with('user')
+            ->get();
+
+        // Separate current user's habits
+        $habit->user_habits = $userHabits
+            ->where('user_id', auth()->user()->id)
+            ->map(function ($uh) {
+                return [
+                    'id' => $uh->id,
+                    'user_id' => $uh->user_id,
+                    'habit_id' => $uh->habit_id,
+                    'completed' => $uh->completed,
+                    'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
+                    'media_path' => $uh->media_path,
+                    'media_type' => $uh->media_type,
+                    'media_caption' => $uh->media_caption,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // All user habits for shared users
+        $habit->all_user_habits = $userHabits
+            ->map(function ($uh) {
+                return [
+                    'id' => $uh->id,
+                    'user_id' => $uh->user_id,
+                    'habit_id' => $uh->habit_id,
+                    'completed' => $uh->completed,
+                    'completed_at' => $uh->completed_at ? $uh->completed_at->toISOString() : null,
+                    'media_path' => $uh->media_path,
+                    'media_type' => $uh->media_type,
+                    'media_caption' => $uh->media_caption,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // Add pivot data (joined_at from updated_at) to shared_with users
+        if ($habit->sharedWith && $habit->sharedWith->count() > 0) {
+            $sharedWithData = $habit->sharedWith->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'joined_at' => $user->pivot->updated_at ? $user->pivot->updated_at->toISOString() : null,
+                ];
+            })->values()->toArray();
+
+            $habit->shared_with = $sharedWithData;
+            unset($habit->sharedWith); // Remove original relation to avoid confusion
+        }
+
+        return $habit;
     }
 
     /**

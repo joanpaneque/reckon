@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import LinkButton from '@/Components/LinkButton.vue';
 import SharedUsersIndicator from '@/Components/SharedUsersIndicator.vue';
 import HabitMediaModal from '@/Components/Habit/HabitMediaModal.vue';
@@ -8,6 +8,7 @@ import MotivationSendModal from '@/Components/Habit/MotivationSendModal.vue';
 import { ChevronLeft, ChevronRight, Check, Clock, X, Calendar, ChevronDown, ChevronUp, Upload, Trash2, Heart, Crown } from 'lucide-vue-next';
 import { router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({
   habits: {
@@ -16,9 +17,20 @@ const props = defineProps({
   },
 });
 
+// Local habits state (will be updated dynamically)
+const localHabits = ref([...props.habits]);
+
+// Loading state
+const isLoading = ref(false);
+const isBackgroundLoading = ref(false); // For silent updates (toggles, media uploads, etc.)
+
 // Calendar state
 const viewMode = ref('day'); // 'day', 'week', 'month'
 const currentDate = ref(new Date());
+
+// Pending state (for smooth transitions)
+const pendingViewMode = ref(null);
+const pendingDate = ref(null);
 
 // Countdown timer state
 const currentTime = ref(new Date());
@@ -45,8 +57,87 @@ const viewModes = [
   { value: 'month', label: 'Month' },
 ];
 
+// Calculate date range based on current view mode and date
+const calculateDateRange = (date, mode) => {
+  const d = new Date(date);
+  let startDate, endDate;
+
+  if (mode === 'day') {
+    // Single day
+    startDate = new Date(d);
+    endDate = new Date(d);
+  } else if (mode === 'week') {
+    // Week range (Monday to Sunday)
+    startDate = getStartOfWeek(d);
+    endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+  } else if (mode === 'month') {
+    // Month range
+    startDate = new Date(d.getFullYear(), d.getMonth(), 1);
+    endDate = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  }
+
+  return {
+    start: startDate.toISOString().split('T')[0],
+    end: endDate.toISOString().split('T')[0],
+  };
+};
+
+// Fetch habits for the current date range
+const fetchHabitsForDateRange = async (date = null, mode = null, silent = false) => {
+  if (silent) {
+    isBackgroundLoading.value = true;
+  } else {
+    isLoading.value = true;
+  }
+  
+  const targetDate = date || currentDate.value;
+  const targetMode = mode || viewMode.value;
+  
+  try {
+    const dateRange = calculateDateRange(targetDate, targetMode);
+    
+    const response = await axios.get(route('habits.date-range'), {
+      params: {
+        start_date: dateRange.start,
+        end_date: dateRange.end,
+      },
+    });
+
+    localHabits.value = response.data.habits;
+    
+    // Only update the actual state after data is loaded (for non-silent loads)
+    if (!silent) {
+      if (pendingDate.value !== null) {
+        currentDate.value = pendingDate.value;
+        pendingDate.value = null;
+      }
+      
+      if (pendingViewMode.value !== null) {
+        viewMode.value = pendingViewMode.value;
+        pendingViewMode.value = null;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching habits:', error);
+    // Reset pending states on error
+    if (!silent) {
+      pendingDate.value = null;
+      pendingViewMode.value = null;
+    }
+  } finally {
+    if (silent) {
+      isBackgroundLoading.value = false;
+    } else {
+      isLoading.value = false;
+    }
+  }
+};
+
 // Navigation
-const goToPrevious = () => {
+const goToPrevious = async () => {
+  if (isLoading.value) return; // Prevent multiple clicks while loading
+  
   const date = new Date(currentDate.value);
   if (viewMode.value === 'day') {
     date.setDate(date.getDate() - 1);
@@ -55,10 +146,14 @@ const goToPrevious = () => {
   } else if (viewMode.value === 'month') {
     date.setMonth(date.getMonth() - 1);
   }
-  currentDate.value = date;
+  
+  pendingDate.value = date;
+  await fetchHabitsForDateRange(date, viewMode.value);
 };
 
-const goToNext = () => {
+const goToNext = async () => {
+  if (isLoading.value) return; // Prevent multiple clicks while loading
+  
   const date = new Date(currentDate.value);
   if (viewMode.value === 'day') {
     date.setDate(date.getDate() + 1);
@@ -67,11 +162,25 @@ const goToNext = () => {
   } else if (viewMode.value === 'month') {
     date.setMonth(date.getMonth() + 1);
   }
-  currentDate.value = date;
+  
+  pendingDate.value = date;
+  await fetchHabitsForDateRange(date, viewMode.value);
 };
 
-const goToToday = () => {
-  currentDate.value = new Date();
+const goToToday = async () => {
+  if (isLoading.value) return; // Prevent multiple clicks while loading
+  
+  const today = new Date();
+  pendingDate.value = today;
+  await fetchHabitsForDateRange(today, viewMode.value);
+};
+
+// Handle view mode change
+const changeViewMode = async (newMode) => {
+  if (isLoading.value) return; // Prevent changes while loading
+  
+  pendingViewMode.value = newMode;
+  await fetchHabitsForDateRange(currentDate.value, newMode);
 };
 
 // Date formatting
@@ -137,7 +246,7 @@ const isHabitActiveOnDate = (habit, date) => {
 
 // Get habits for a specific date
 const getHabitsForDate = (date) => {
-  return props.habits.filter(habit => isHabitActiveOnDate(habit, date));
+  return localHabits.value.filter(habit => isHabitActiveOnDate(habit, date));
 };
 
 // Day view
@@ -547,7 +656,7 @@ const handleDeleteMedia = (habit, date) => {
   router.delete(route('habits.media.delete', userHabit.id), {
     preserveScroll: true,
     onSuccess: () => {
-      router.reload({ only: ['habits'] });
+      fetchHabitsForDateRange(null, null, true);
     },
     onError: () => {
       alert('Error deleting media. Please try again.');
@@ -630,8 +739,8 @@ const closeMediaModal = () => {
 };
 
 const handleMediaUploaded = () => {
-  // Reload the page data to show the new media
-  router.reload({ only: ['habits'] });
+  // Reload the habits for current date range (silent)
+  fetchHabitsForDateRange(null, null, true);
 };
 
 // Handle motivation modal
@@ -645,23 +754,107 @@ const closeMotivationModal = () => {
   selectedMotivationUser.value = null;
 };
 
-// Handle checkbox change
+// Handle checkbox change with optimistic update
 const handleHabitToggle = (habit, date, completed) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
+  const dateStr = date.toISOString().split('T')[0];
 
+  // Optimistic update: Update local state immediately with deep clone
+  const habitIndex = localHabits.value.findIndex(h => h.id === habit.id);
+  if (habitIndex !== -1) {
+    // Deep clone the habit to ensure reactivity
+    const updatedHabit = JSON.parse(JSON.stringify(localHabits.value[habitIndex]));
+    
+    // Update or add user_habits entry for current user
+    const existingUserHabitIndex = updatedHabit.user_habits.findIndex(uh => {
+      if (!uh.completed_at) return false;
+      const uhDate = uh.completed_at.split('T')[0];
+      return uhDate === dateStr;
+    });
+
+    if (completed) {
+      // If marking as completed, add or update the entry
+      const newUserHabit = {
+        id: null, // Will be set by server
+        user_id: currentUserId,
+        habit_id: habit.id,
+        completed: true,
+        completed_at: date.toISOString(),
+        media_path: null,
+        media_type: null,
+        media_caption: null,
+      };
+
+      if (existingUserHabitIndex !== -1) {
+        updatedHabit.user_habits.splice(existingUserHabitIndex, 1, newUserHabit);
+      } else {
+        updatedHabit.user_habits.push(newUserHabit);
+      }
+    } else {
+      // If unmarking (completed = false), filter out the entry completely
+      updatedHabit.user_habits = updatedHabit.user_habits.filter(uh => {
+        if (!uh.completed_at) return true;
+        const uhDate = uh.completed_at.split('T')[0];
+        return uhDate !== dateStr;
+      });
+    }
+
+    // Update all_user_habits as well
+    const existingAllUserHabitIndex = updatedHabit.all_user_habits.findIndex(uh => {
+      if (!uh.completed_at) return false;
+      const uhDate = uh.completed_at.split('T')[0];
+      return uhDate === dateStr && uh.user_id === currentUserId;
+    });
+
+    if (completed) {
+      // If marking as completed, add or update the entry
+      const newUserHabit = {
+        id: null,
+        user_id: currentUserId,
+        habit_id: habit.id,
+        completed: true,
+        completed_at: date.toISOString(),
+        media_path: null,
+        media_type: null,
+        media_caption: null,
+      };
+
+      if (existingAllUserHabitIndex !== -1) {
+        updatedHabit.all_user_habits.splice(existingAllUserHabitIndex, 1, newUserHabit);
+      } else {
+        updatedHabit.all_user_habits.push(newUserHabit);
+      }
+    } else {
+      // If unmarking, filter out all entries for this user and date
+      updatedHabit.all_user_habits = updatedHabit.all_user_habits.filter(uh => {
+        if (!uh.completed_at) return true;
+        const uhDate = uh.completed_at.split('T')[0];
+        return !(uhDate === dateStr && uh.user_id === currentUserId);
+      });
+    }
+
+    // Force Vue reactivity by replacing the entire habits array
+    const newHabits = [...localHabits.value];
+    newHabits[habitIndex] = updatedHabit;
+    localHabits.value = newHabits;
+  }
+
+  // Send request to server (non-blocking)
   router.post(route('habits.completion', habit.id), {
     completed: completed,
-    date: date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+    date: dateStr,
   }, {
     preserveState: true,
     preserveScroll: true,
     onSuccess: (response) => {
-      // Reload habits data to get the updated user_habit with ID
-      router.reload({ only: ['habits'] });
+      // Silent reload to sync with server (get the proper ID and confirm state)
+      fetchHabitsForDateRange(null, null, true);
     },
     onError: (errors) => {
       console.error('Error updating habit completion:', errors);
+      // Revert optimistic update on error by reloading from server
+      fetchHabitsForDateRange(null, null, true);
     }
   });
 };
@@ -746,7 +939,11 @@ onUnmounted(() => {
       <div class="flex items-center gap-1 md:gap-2">
         <button
           @click="goToPrevious"
-          class="p-1.5 md:p-2 hover:bg-dark-secondary/50 transition-colors flex-shrink-0"
+          :disabled="isLoading"
+          :class="[
+            'p-1.5 md:p-2 hover:bg-dark-secondary/50 transition-colors flex-shrink-0',
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          ]"
         >
           <ChevronLeft :size="20" />
         </button>
@@ -755,13 +952,21 @@ onUnmounted(() => {
         </h2>
         <button
           @click="goToNext"
-          class="p-1.5 md:p-2 hover:bg-dark-secondary/50 transition-colors flex-shrink-0"
+          :disabled="isLoading"
+          :class="[
+            'p-1.5 md:p-2 hover:bg-dark-secondary/50 transition-colors flex-shrink-0',
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          ]"
         >
           <ChevronRight :size="20" />
         </button>
         <button
           @click="goToToday"
-          class="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-text-secondary bg-dark-secondary hover:bg-dark-input-border transition-colors flex-shrink-0"
+          :disabled="isLoading"
+          :class="[
+            'px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium text-text-secondary bg-dark-secondary hover:bg-dark-input-border transition-colors flex-shrink-0',
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          ]"
         >
           Today
         </button>
@@ -788,12 +993,14 @@ onUnmounted(() => {
           <button
             v-for="mode in viewModes"
             :key="mode.value"
-            @click="viewMode = mode.value"
+            @click="changeViewMode(mode.value)"
+            :disabled="isLoading"
             :class="[
               'flex-1 md:flex-none px-3 py-1.5 text-xs md:text-sm font-medium transition-colors rounded-modern',
               viewMode === mode.value
                 ? 'bg-accent text-dark-primary'
-                : 'bg-dark-secondary text-text-secondary hover:bg-dark-input-border'
+                : 'bg-dark-secondary text-text-secondary hover:bg-dark-input-border',
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
             ]"
           >
             {{ mode.label }}
@@ -802,8 +1009,18 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Day View -->
-    <div v-if="viewMode === 'day'" class="space-y-2">
+    <!-- Views container with loading overlay -->
+    <div class="relative">
+      <!-- Loading overlay (shows on top of current view - only for navigation) -->
+      <div v-if="isLoading" class="absolute inset-0 bg-dark-primary/80 backdrop-blur-sm z-50 flex items-center justify-center min-h-[300px]">
+        <div class="inline-flex items-center gap-2 text-text-primary bg-dark-secondary px-6 py-4 rounded-modern shadow-modern border border-dark-border">
+          <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-accent"></div>
+          <span class="text-sm font-medium">Loading habits...</span>
+        </div>
+      </div>
+
+      <!-- Day View -->
+      <div v-if="viewMode === 'day'" class="space-y-2" :class="{ 'opacity-50 pointer-events-none': isLoading }">
       <div class="px-4 md:px-0">
         <div v-if="dayViewHabits.length === 0" class="text-center py-8 text-text-secondary text-sm">
           No habits scheduled for this day
@@ -934,7 +1151,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Week View -->
-    <div v-if="viewMode === 'week'" class="w-full overflow-x-auto">
+    <div v-if="viewMode === 'week'" class="w-full overflow-x-auto" :class="{ 'opacity-50 pointer-events-none': isLoading }">
       <div class="border border-dark-border min-w-[640px]">
         <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));">
           <div
@@ -995,7 +1212,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Month View -->
-    <div v-if="viewMode === 'month'" class="w-full overflow-x-auto">
+    <div v-if="viewMode === 'month'" class="w-full overflow-x-auto" :class="{ 'opacity-50 pointer-events-none': isLoading }">
       <div class="border border-dark-border min-w-[640px]">
         <!-- Day headers -->
         <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));" class="bg-dark-secondary border-b border-dark-border">
@@ -1068,6 +1285,7 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <!-- Media Upload Modal -->
