@@ -57,6 +57,26 @@ const viewModes = [
   { value: 'month', label: 'Month' },
 ];
 
+// Helper function to format date as YYYY-MM-DD using local timezone (not UTC)
+const formatDateLocal = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper function to normalize dates for comparison (handles both Date objects and ISO strings)
+const normalizeDateForComparison = (dateInput) => {
+  if (dateInput instanceof Date) {
+    return formatDateLocal(dateInput);
+  } else if (typeof dateInput === 'string') {
+    // Parse ISO string and convert to local date
+    const date = new Date(dateInput);
+    return formatDateLocal(date);
+  }
+  return null;
+};
+
 // Calculate date range based on current view mode and date
 const calculateDateRange = (date, mode) => {
   const d = new Date(date);
@@ -77,9 +97,10 @@ const calculateDateRange = (date, mode) => {
     endDate = new Date(d.getFullYear(), d.getMonth() + 1, 0);
   }
 
+  // Use local timezone formatting instead of UTC to avoid timezone shifts
   return {
-    start: startDate.toISOString().split('T')[0],
-    end: endDate.toISOString().split('T')[0],
+    start: formatDateLocal(startDate),
+    end: formatDateLocal(endDate),
   };
 };
 
@@ -424,10 +445,8 @@ const getStatusGradient = (status) => {
 // Get completion status for a specific user on a habit and date
 const getUserHabitCompletionStatus = (habit, userId, date) => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const checkDate = new Date(date);
-  checkDate.setHours(0, 0, 0, 0);
+  const todayStr = normalizeDateForComparison(today);
+  const checkDateStr = normalizeDateForComparison(date);
 
   // Check if this user is a shared user and when they joined
   const page = usePage();
@@ -437,11 +456,10 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
     const sharedUser = habit.shared_with.find(u => u.id === userId);
 
     if (sharedUser && sharedUser.joined_at) {
-      const joinedDate = new Date(sharedUser.joined_at);
-      joinedDate.setHours(0, 0, 0, 0);
+      const joinedDateStr = normalizeDateForComparison(sharedUser.joined_at);
 
       // If checking a date before the user joined, don't show it as missed
-      if (checkDate < joinedDate) {
+      if (checkDateStr < joinedDateStr) {
         return 'future'; // Treat as future (gray) - user hadn't joined yet
       }
     }
@@ -451,9 +469,8 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
   // This ensures each user's completion status is independent
   const completion = habit.all_user_habits?.find(uh => {
     if (uh.user_id !== userId || !uh.completed_at) return false;
-    const completedDate = new Date(uh.completed_at);
-    completedDate.setHours(0, 0, 0, 0);
-    return completedDate.getTime() === checkDate.getTime();
+    const completedDateStr = normalizeDateForComparison(uh.completed_at);
+    return completedDateStr === checkDateStr;
   });
 
   // If there's a completion record and it's marked as completed
@@ -462,12 +479,12 @@ const getUserHabitCompletionStatus = (habit, userId, date) => {
   }
 
   // If it's today and not completed (or no record exists)
-  if (checkDate.getTime() === today.getTime()) {
+  if (checkDateStr === todayStr) {
     return 'today'; // Amarillo
   }
 
   // If it's a past date and not completed (or no record exists)
-  if (checkDate < today) {
+  if (checkDateStr < todayStr) {
     return 'missed'; // Rojo
   }
 
@@ -603,10 +620,8 @@ const hasMediaForToday = (habit, date) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
 
-  // Normalize the date to YYYY-MM-DD format
-  const checkDate = new Date(date);
-  checkDate.setHours(0, 0, 0, 0);
-  const checkDateStr = checkDate.toISOString().split('T')[0];
+  // Normalize the date to YYYY-MM-DD format using local timezone
+  const checkDateStr = normalizeDateForComparison(date);
 
   const userHabit = habit.all_user_habits?.find(uh => {
     if (!uh) return false;
@@ -614,8 +629,8 @@ const hasMediaForToday = (habit, date) => {
     if (!uh.completed) return false;
     if (!uh.completed_at) return false;
 
-    // Compare dates (normalized to YYYY-MM-DD)
-    const completedDateStr = uh.completed_at.split('T')[0];
+    // Compare dates (normalized to local YYYY-MM-DD)
+    const completedDateStr = normalizeDateForComparison(uh.completed_at);
     return completedDateStr === checkDateStr;
   });
 
@@ -631,10 +646,8 @@ const handleDeleteMedia = (habit, date) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
 
-  // Normalize the date to YYYY-MM-DD format
-  const checkDate = new Date(date);
-  checkDate.setHours(0, 0, 0, 0);
-  const checkDateStr = checkDate.toISOString().split('T')[0];
+  // Normalize the date to YYYY-MM-DD format using local timezone
+  const checkDateStr = normalizeDateForComparison(date);
 
   const userHabit = habit.all_user_habits?.find(uh => {
     if (!uh) return false;
@@ -642,8 +655,8 @@ const handleDeleteMedia = (habit, date) => {
     if (!uh.completed) return false;
     if (!uh.completed_at) return false;
 
-    // Compare dates (normalized to YYYY-MM-DD)
-    const completedDateStr = uh.completed_at.split('T')[0];
+    // Compare dates (normalized to local YYYY-MM-DD)
+    const completedDateStr = normalizeDateForComparison(uh.completed_at);
     return completedDateStr === checkDateStr;
   });
 
@@ -691,10 +704,8 @@ const handleMediaFileSelect = (event, habit, date) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
 
-  // Normalize the date to YYYY-MM-DD format
-  const checkDate = new Date(date);
-  checkDate.setHours(0, 0, 0, 0);
-  const checkDateStr = checkDate.toISOString().split('T')[0];
+  // Normalize the date to YYYY-MM-DD format using local timezone
+  const checkDateStr = normalizeDateForComparison(date);
 
   const userHabit = habit.all_user_habits?.find(uh => {
     if (!uh) return false;
@@ -702,8 +713,8 @@ const handleMediaFileSelect = (event, habit, date) => {
     if (!uh.completed) return false;
     if (!uh.completed_at) return false;
 
-    // Compare dates (normalized to YYYY-MM-DD)
-    const completedDateStr = uh.completed_at.split('T')[0];
+    // Compare dates (normalized to local YYYY-MM-DD)
+    const completedDateStr = normalizeDateForComparison(uh.completed_at);
     return completedDateStr === checkDateStr;
   });
 
@@ -758,7 +769,8 @@ const closeMotivationModal = () => {
 const handleHabitToggle = (habit, date, completed) => {
   const page = usePage();
   const currentUserId = page.props.auth.user.id;
-  const dateStr = date.toISOString().split('T')[0];
+  // Use local date format to match what we send to server
+  const dateStr = formatDateLocal(date);
 
   // Optimistic update: Update local state immediately with deep clone
   const habitIndex = localHabits.value.findIndex(h => h.id === habit.id);
@@ -769,7 +781,7 @@ const handleHabitToggle = (habit, date, completed) => {
     // Update or add user_habits entry for current user
     const existingUserHabitIndex = updatedHabit.user_habits.findIndex(uh => {
       if (!uh.completed_at) return false;
-      const uhDate = uh.completed_at.split('T')[0];
+      const uhDate = normalizeDateForComparison(uh.completed_at);
       return uhDate === dateStr;
     });
 
@@ -795,7 +807,7 @@ const handleHabitToggle = (habit, date, completed) => {
       // If unmarking (completed = false), filter out the entry completely
       updatedHabit.user_habits = updatedHabit.user_habits.filter(uh => {
         if (!uh.completed_at) return true;
-        const uhDate = uh.completed_at.split('T')[0];
+        const uhDate = normalizeDateForComparison(uh.completed_at);
         return uhDate !== dateStr;
       });
     }
@@ -803,7 +815,7 @@ const handleHabitToggle = (habit, date, completed) => {
     // Update all_user_habits as well
     const existingAllUserHabitIndex = updatedHabit.all_user_habits.findIndex(uh => {
       if (!uh.completed_at) return false;
-      const uhDate = uh.completed_at.split('T')[0];
+      const uhDate = normalizeDateForComparison(uh.completed_at);
       return uhDate === dateStr && uh.user_id === currentUserId;
     });
 
@@ -829,7 +841,7 @@ const handleHabitToggle = (habit, date, completed) => {
       // If unmarking, filter out all entries for this user and date
       updatedHabit.all_user_habits = updatedHabit.all_user_habits.filter(uh => {
         if (!uh.completed_at) return true;
-        const uhDate = uh.completed_at.split('T')[0];
+        const uhDate = normalizeDateForComparison(uh.completed_at);
         return !(uhDate === dateStr && uh.user_id === currentUserId);
       });
     }

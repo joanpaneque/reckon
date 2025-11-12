@@ -12,28 +12,46 @@ const showLightbox = ref(false);
 const selectedMedia = ref(null);
 const selectedUserIndex = ref(0);
 
+// Helper function to format date as YYYY-MM-DD using local timezone (not UTC)
+const formatDateLocal = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper function to normalize dates for comparison (handles both Date objects and ISO strings)
+const normalizeDateForComparison = (dateInput) => {
+  if (dateInput instanceof Date) {
+    return formatDateLocal(dateInput);
+  } else if (typeof dateInput === 'string') {
+    // Parse ISO string and convert to local date
+    const date = new Date(dateInput);
+    return formatDateLocal(date);
+  }
+  return null;
+};
+
 // Get all media for this date from all users
 const mediaItems = computed(() => {
-  const checkDate = new Date(props.date);
-  checkDate.setHours(0, 0, 0, 0);
-
   const items = [];
 
   console.log('🎬 HabitMediaViewer - Looking for media:', {
     habitName: props.habit.name,
-    date: checkDate.toLocaleDateString(),
+    date: formatDateLocal(props.date),
     users: props.users.map(u => u.name),
     allUserHabits: props.habit.all_user_habits
   });
+
+  const checkDateStr = normalizeDateForComparison(props.date);
 
   props.users.forEach(user => {
     const userHabit = props.habit.all_user_habits?.find(uh => {
       if (uh.user_id !== user.id || !uh.completed_at) return false;
 
-      // Compare only the date part (YYYY-MM-DD) to avoid timezone issues
-      const completedDateStr = uh.completed_at.split('T')[0];
-      const checkDateStr = checkDate.toISOString().split('T')[0];
-
+      // Compare dates using local timezone to avoid timezone issues
+      const completedDateStr = normalizeDateForComparison(uh.completed_at);
       return completedDateStr === checkDateStr;
     });
 
@@ -41,7 +59,7 @@ const mediaItems = computed(() => {
       found: !!userHabit,
       hasMedia: !!userHabit?.media_path,
       completedAt: userHabit?.completed_at,
-      checkingFor: checkDate.toISOString().split('T')[0],
+      checkingFor: checkDateStr,
       userHabit
     });
 

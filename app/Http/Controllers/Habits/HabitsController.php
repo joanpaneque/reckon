@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Habit;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class HabitsController extends Controller
 {
@@ -77,11 +78,17 @@ class HabitsController extends Controller
      */
     private function mapHabitWithDateRange($habit, $startDate, $endDate)
     {
+        // Parse dates using Carbon to handle timezone correctly
+        // The dates come from frontend as Y-m-d strings (UTC), but we need to interpret
+        // them in the server's timezone (Europe/Madrid) to get the correct day boundaries
+        $startCarbon = Carbon::parse($startDate)->startOfDay();
+        $endCarbon = Carbon::parse($endDate)->endOfDay();
+        
         // Load user habits filtered by date range
         $userHabits = $habit->userHabits()
             ->whereBetween('completed_at', [
-                $startDate . ' 00:00:00',
-                $endDate . ' 23:59:59'
+                $startCarbon,
+                $endCarbon
             ])
             ->with('user')
             ->get();
