@@ -12,8 +12,13 @@ class Habit extends Model
         'start_date',
         'end_date',
         'frequency',
+        'selected_days',
         'color',
         'user_id',
+    ];
+
+    protected $casts = [
+        'selected_days' => 'array',
     ];
 
     public function user()

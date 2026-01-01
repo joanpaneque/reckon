@@ -247,6 +247,11 @@ class User extends Authenticatable
                         // Saturday (6) and Sunday (0)
                         $shouldTrack = $dayOfWeek === 0 || $dayOfWeek === 6;
                         break;
+                    case 'custom':
+                        // Check if current day is in selected_days array
+                        $selectedDays = $habit->selected_days ?? [];
+                        $shouldTrack = in_array($dayOfWeek, $selectedDays);
+                        break;
                 }
 
                 if (!$shouldTrack) {

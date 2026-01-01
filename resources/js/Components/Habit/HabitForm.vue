@@ -46,9 +46,48 @@ const form = useForm({
   start_date: props.habit?.start_date || '',
   end_date: props.habit?.end_date || '',
   frequency: props.habit?.frequency || 'everyday',
+  selected_days: props.habit?.selected_days || [],
   color: props.habit?.color || '#93C5FD',
   shared_with: props.habit?.shared_with || [],
 });
+
+// Days of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+// Ordered with Monday first for display
+const daysOfWeek = [
+  { value: 1, label: 'Monday', short: 'Mon' },
+  { value: 2, label: 'Tuesday', short: 'Tue' },
+  { value: 3, label: 'Wednesday', short: 'Wed' },
+  { value: 4, label: 'Thursday', short: 'Thu' },
+  { value: 5, label: 'Friday', short: 'Fri' },
+  { value: 6, label: 'Saturday', short: 'Sat' },
+  { value: 0, label: 'Sunday', short: 'Sun' },
+];
+
+// Toggle day selection
+const toggleDay = (dayValue) => {
+  if (!form.selected_days) {
+    form.selected_days = [];
+  }
+  const index = form.selected_days.indexOf(dayValue);
+  if (index > -1) {
+    form.selected_days.splice(index, 1);
+  } else {
+    form.selected_days.push(dayValue);
+  }
+  // Sort to keep days in order with Monday first (1-6, then 0)
+  form.selected_days.sort((a, b) => {
+    if (a === 0) return 1; // Sunday goes to end
+    if (b === 0) return -1; // Sunday goes to end
+    return a - b;
+  });
+};
+
+// Watch frequency changes to clear selected_days if not custom
+const watchFrequency = () => {
+  if (form.frequency !== 'custom') {
+    form.selected_days = [];
+  }
+};
 
 const filterFriends = (friend, search) => {
   const searchLower = search.toLowerCase();
@@ -153,16 +192,45 @@ const submit = () => {
       <label class="block text-sm font-medium text-text-secondary mb-1">Frequency</label>
       <select
         v-model="form.frequency"
+        @change="watchFrequency"
         class="input-modern w-full"
         :class="{ 'border-red-600 focus:border-red-600 focus:ring-red-600': form.errors.frequency }"
       >
         <option value="everyday">Everyday</option>
         <option value="weekdays">Weekdays</option>
         <option value="weekends">Weekends</option>
+        <option value="custom">Custom days</option>
       </select>
       <p v-if="form.errors.frequency" class="mt-1 text-sm text-red-600">
         {{ form.errors.frequency }}
       </p>
+      
+      <!-- Custom days selector -->
+      <div v-if="form.frequency === 'custom'" class="mt-3">
+        <label class="block text-sm font-medium text-text-secondary mb-2">Select days</label>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="day in daysOfWeek"
+            :key="day.value"
+            type="button"
+            @click="toggleDay(day.value)"
+            :class="[
+              'px-4 py-2 rounded-modern border-2 transition-all duration-modern text-sm font-medium',
+              form.selected_days && form.selected_days.includes(day.value)
+                ? 'bg-accent border-accent text-dark-primary'
+                : 'bg-dark-secondary border-dark-border text-text-secondary hover:border-accent'
+            ]"
+          >
+            {{ day.short }}
+          </button>
+        </div>
+        <p v-if="form.errors.selected_days" class="mt-1 text-sm text-red-600">
+          {{ form.errors.selected_days }}
+        </p>
+        <p v-if="form.selected_days && form.selected_days.length === 0" class="mt-1 text-sm text-text-secondary">
+          Please select at least one day
+        </p>
+      </div>
     </div>
 
     <div>

@@ -17,6 +17,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['date-changed', 'view-mode-changed']);
+
 // Local habits state (will be updated dynamically)
 const localHabits = ref([...props.habits]);
 
@@ -128,6 +130,7 @@ const fetchHabitsForDateRange = async (date = null, mode = null, silent = false)
     localHabits.value = response.data.habits;
     
     // Only update the actual state after data is loaded (for non-silent loads)
+    // The watch will automatically emit changes to parent
     if (!silent) {
       if (pendingDate.value !== null) {
         currentDate.value = pendingDate.value;
@@ -260,6 +263,10 @@ const isHabitActiveOnDate = (habit, date) => {
     return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
   } else if (habit.frequency === 'weekends') {
     return dayOfWeek === 0 || dayOfWeek === 6; // Saturday or Sunday
+  } else if (habit.frequency === 'custom') {
+    // Check if current day is in selected_days array
+    const selectedDays = habit.selected_days || [];
+    return selectedDays.includes(dayOfWeek);
   }
 
   return false;
@@ -934,9 +941,16 @@ const formatCountdown = computed(() => {
   }
 });
 
+// Watch for date and view mode changes to emit to parent
+watch([currentDate, viewMode], ([newDate, newMode]) => {
+  emit('date-changed', newDate);
+  emit('view-mode-changed', newMode);
+}, { immediate: true });
+
 // Lifecycle hooks
 onMounted(() => {
   startCountdown();
+  // Initial values will be emitted by watch with immediate: true
 });
 
 onUnmounted(() => {

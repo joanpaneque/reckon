@@ -210,7 +210,9 @@ class HabitsController extends Controller
             'description' => ['nullable', 'string', 'max:1000'],
             'start_date' => ['required', 'date', 'before_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'frequency' => ['required', 'string', 'in:everyday,weekdays,weekends'],
+            'frequency' => ['required', 'string', 'in:everyday,weekdays,weekends,custom'],
+            'selected_days' => ['nullable', 'array', 'required_if:frequency,custom'],
+            'selected_days.*' => ['integer', 'min:0', 'max:6'],
             'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'shared_with' => ['nullable', 'array'],
         ], [
@@ -225,9 +227,26 @@ class HabitsController extends Controller
             'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
             'frequency.required' => 'Please select a frequency.',
             'frequency.in' => 'Please select a valid frequency option.',
+            'selected_days.required_if' => 'Please select at least one day when using custom frequency.',
+            'selected_days.array' => 'Selected days must be an array.',
+            'selected_days.*.integer' => 'Each selected day must be a number.',
+            'selected_days.*.min' => 'Each selected day must be between 0 (Sunday) and 6 (Saturday).',
+            'selected_days.*.max' => 'Each selected day must be between 0 (Sunday) and 6 (Saturday).',
             'color.required' => 'Please select a color.',
             'color.regex' => 'Please provide a valid hexadecimal color (e.g., #93C5FD).',
         ]);
+
+        // If frequency is not custom, clear selected_days
+        if ($validated['frequency'] !== 'custom') {
+            $validated['selected_days'] = null;
+        } else {
+            // Ensure selected_days is not empty when custom
+            if (empty($validated['selected_days'])) {
+                return back()->withErrors([
+                    'selected_days' => 'Please select at least one day when using custom frequency.'
+                ])->withInput();
+            }
+        }
 
         // Validate shared_with users are friends
         $validationError = $this->validateSharedWith($validated['shared_with'] ?? []);
@@ -286,7 +305,9 @@ class HabitsController extends Controller
             'description' => ['nullable', 'string', 'max:1000'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'frequency' => ['required', 'string', 'in:everyday,weekdays,weekends'],
+            'frequency' => ['required', 'string', 'in:everyday,weekdays,weekends,custom'],
+            'selected_days' => ['nullable', 'array', 'required_if:frequency,custom'],
+            'selected_days.*' => ['integer', 'min:0', 'max:6'],
             'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'shared_with' => ['nullable', 'array'],
         ], [
@@ -300,9 +321,26 @@ class HabitsController extends Controller
             'end_date.after_or_equal' => 'The end date must be after or equal to the start date.',
             'frequency.required' => 'Please select a frequency.',
             'frequency.in' => 'Please select a valid frequency option.',
+            'selected_days.required_if' => 'Please select at least one day when using custom frequency.',
+            'selected_days.array' => 'Selected days must be an array.',
+            'selected_days.*.integer' => 'Each selected day must be a number.',
+            'selected_days.*.min' => 'Each selected day must be between 0 (Sunday) and 6 (Saturday).',
+            'selected_days.*.max' => 'Each selected day must be between 0 (Sunday) and 6 (Saturday).',
             'color.required' => 'Please select a color.',
             'color.regex' => 'Please provide a valid hexadecimal color (e.g., #93C5FD).',
         ]);
+
+        // If frequency is not custom, clear selected_days
+        if ($validated['frequency'] !== 'custom') {
+            $validated['selected_days'] = null;
+        } else {
+            // Ensure selected_days is not empty when custom
+            if (empty($validated['selected_days'])) {
+                return back()->withErrors([
+                    'selected_days' => 'Please select at least one day when using custom frequency.'
+                ])->withInput();
+            }
+        }
 
         // Validate shared_with users are friends
         $validationError = $this->validateSharedWith($validated['shared_with'] ?? []);

@@ -38,8 +38,26 @@ const getFrequencyBadgeColor = (frequency) => {
     everyday: 'bg-green-500/20 text-green-400',
     weekdays: 'bg-accent/20 text-accent',
     weekends: 'bg-purple-500/20 text-purple-400',
+    custom: 'bg-blue-500/20 text-blue-400',
   };
   return colors[frequency] || 'bg-text-tertiary/20 text-text-tertiary';
+};
+
+const formatFrequency = (habit) => {
+  if (habit.frequency === 'custom' && habit.selected_days && habit.selected_days.length > 0) {
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // Sort with Monday first (1-6, then 0)
+    const sortedDays = habit.selected_days.sort((a, b) => {
+      if (a === 0) return 1; // Sunday goes to end
+      if (b === 0) return -1; // Sunday goes to end
+      return a - b;
+    });
+    const selectedDayNames = sortedDays
+      .map(day => dayNames[day])
+      .join(', ');
+    return `Custom (${selectedDayNames})`;
+  }
+  return habit.frequency.charAt(0).toUpperCase() + habit.frequency.slice(1);
 };
 
 const daysSinceStart = computed(() => {
@@ -61,13 +79,46 @@ const isActive = computed(() => {
 
 <template>
   <AppLayout :title="habit.name">
-    <div class="space-y-6">
-      <div class="flex items-center justify-between">
+    <div class="space-y-4 md:space-y-6">
+      <!-- Mobile Header -->
+      <div class="md:hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <h1 class="text-xl font-bold text-text-primary tracking-wide-modern">
+            {{ habit.name }}
+          </h1>
+          <LinkButton prefetch :href="route('habits.index')" variant="secondary" size="sm">
+            Back
+          </LinkButton>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span :class="getFrequencyBadgeColor(habit.frequency)" class="px-2 py-1 text-xs font-medium rounded-full">
+            {{ formatFrequency(habit) }}
+          </span>
+          <span v-if="isActive" class="px-2 py-1 text-xs font-medium rounded-full bg-green-500/20 text-green-400">
+            Active
+          </span>
+          <span v-else class="px-2 py-1 text-xs font-medium rounded-full bg-text-tertiary/20 text-text-tertiary">
+            Inactive
+          </span>
+        </div>
+        <!-- Mobile Action Buttons -->
+        <div class="flex gap-2 pt-2 border-t border-dark-border">
+          <LinkButton prefetch :href="route('habits.edit', habit.id)" variant="primary" size="sm" class="flex-1">
+            Edit Habit
+          </LinkButton>
+          <LinkButton @click="confirmDelete" variant="danger" size="sm" class="flex-1">
+            Delete
+          </LinkButton>
+        </div>
+      </div>
+
+      <!-- Desktop Header -->
+      <div class="hidden md:flex items-center justify-between">
         <div>
           <h1 class="text-h2 font-bold text-text-primary tracking-wide-modern flex items-center gap-3">
             {{ habit.name }}
             <span :class="getFrequencyBadgeColor(habit.frequency)" class="px-3 py-1 text-sm font-medium rounded-full">
-              {{ habit.frequency }}
+              {{ formatFrequency(habit) }}
             </span>
             <span v-if="isActive" class="px-3 py-1 text-sm font-medium rounded-full bg-green-500/20 text-green-400">
               Active
@@ -102,7 +153,7 @@ const isActive = computed(() => {
 
             <div>
               <h3 class="text-sm font-medium text-gray-700 mb-1">Frequency</h3>
-              <p class="text-gray-900 capitalize">{{ habit.frequency }}</p>
+              <p class="text-gray-900">{{ formatFrequency(habit) }}</p>
             </div>
 
             <div>
@@ -111,7 +162,7 @@ const isActive = computed(() => {
             </div>
           </div>
 
-          <div class="flex gap-2 pt-4 border-t">
+          <div class="hidden md:flex gap-2 pt-4 border-t">
             <LinkButton prefetch :href="route('habits.edit', habit.id)" variant="primary" size="sm">
               Edit Habit
             </LinkButton>

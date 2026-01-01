@@ -30,6 +30,23 @@ const abandonHabit = (habitId) => {
   const form = useForm({});
   form.post(route('shared-habits.abandon', habitId));
 };
+
+const formatFrequency = (habit) => {
+  if (habit.frequency === 'custom' && habit.selected_days && habit.selected_days.length > 0) {
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // Sort with Monday first (1-6, then 0)
+    const sortedDays = habit.selected_days.sort((a, b) => {
+      if (a === 0) return 1; // Sunday goes to end
+      if (b === 0) return -1; // Sunday goes to end
+      return a - b;
+    });
+    const selectedDayNames = sortedDays
+      .map(day => dayNames[day])
+      .join(', ');
+    return `Custom (${selectedDayNames})`;
+  }
+  return habit.frequency.charAt(0).toUpperCase() + habit.frequency.slice(1);
+};
 </script>
 
 <template>
@@ -70,7 +87,7 @@ const abandonHabit = (habitId) => {
                       {{ habit.description }}
                     </p>
                     <div class="text-xs text-gray-500 mt-1">
-                      {{ habit.start_date }} to {{ habit.end_date }} • {{ habit.frequency }}
+                      {{ habit.start_date }} to {{ habit.end_date }} • {{ formatFrequency(habit) }}
                     </div>
                   </div>
                 </div>
@@ -125,7 +142,7 @@ const abandonHabit = (habitId) => {
                       {{ habit.description }}
                     </p>
                     <div class="text-xs text-gray-500 mt-1">
-                      {{ habit.start_date }} to {{ habit.end_date }} • {{ habit.frequency }}
+                      {{ habit.start_date }} to {{ habit.end_date }} • {{ formatFrequency(habit) }}
                     </div>
                   </div>
                 </div>

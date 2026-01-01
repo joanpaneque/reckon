@@ -10,6 +10,7 @@ use App\Http\Controllers\Friends\FriendsController;
 use App\Http\Controllers\Habits\HabitsController;
 use App\Http\Controllers\Habits\UserHabitsController;
 use App\Http\Controllers\Habits\SharedHabitsController;
+use App\Http\Controllers\Todos\TodosController;
 use App\Http\Controllers\MotivationController;
 
 // Auth routes
@@ -46,6 +47,16 @@ Route::middleware('App\Http\Middleware\RequireAuth')->group(function () {
     Route::post('shared-habits/{habit}/accept', [SharedHabitsController::class, 'accept'])->name('shared-habits.accept');
     Route::post('shared-habits/{habit}/refuse', [SharedHabitsController::class, 'refuse'])->name('shared-habits.refuse');
     Route::post('shared-habits/{habit}/abandon', [SharedHabitsController::class, 'abandon'])->name('shared-habits.abandon');
+
+    // Todos routes
+    Route::get('todos', [TodosController::class, 'index'])->name('todos.index');
+    Route::get('todos-date-range', [TodosController::class, 'getTodosForDateRange'])->name('todos.date-range');
+    Route::get('todos/create', [TodosController::class, 'create'])->name('todos.create');
+    Route::post('todos', [TodosController::class, 'store'])->name('todos.store');
+    Route::get('todos/{date}/edit', [TodosController::class, 'edit'])->name('todos.edit');
+    Route::put('todos/{date}', [TodosController::class, 'update'])->name('todos.update');
+    Route::post('todos/{id}/toggle-complete', [TodosController::class, 'toggleComplete'])->name('todos.toggle-complete');
+    Route::delete('todos/{id}', [TodosController::class, 'destroy'])->name('todos.destroy');
 
     // Motivation routes
     Route::post('motivations', [MotivationController::class, 'store'])->name('motivations.store');

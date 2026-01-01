@@ -4,7 +4,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { usePage } from '@inertiajs/vue3';
 import Button from '@/Components/Button.vue';
 import Modal from '@/Components/Modal.vue';
-import { Home, ClipboardList, Users, Calendar, Menu, X } from 'lucide-vue-next';
+import { Home, ClipboardList, Users, Calendar, CheckSquare, Menu, X } from 'lucide-vue-next';
 
 defineProps({
   title: {
@@ -102,6 +102,16 @@ const closeMobileMenu = () => {
         >
           <Calendar :size="20" :stroke-width="2" />
           Habits
+        </Link>
+        <Link
+           prefetch
+          :href="route('todos.index')"
+          @click="closeMobileMenu"
+          class="nav-link flex items-center gap-2 px-4 py-3 text-sm border-b border-dark-border"
+          :class="{ 'nav-link-active': route().current('todos.*') }"
+        >
+          <CheckSquare :size="20" :stroke-width="2" />
+          To do's
         </Link>
       </nav>
     </aside>
