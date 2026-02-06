@@ -50,6 +50,22 @@ class ImportWorkOrderEntries extends Command
             return 1;
         }
 
+        // Eliminar entradas existentes excepto las 3 primeras
+        $existingEntries = WorkOrderEntry::where('work_order_id', $workOrderId)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        if ($existingEntries->count() > 3) {
+            $entriesToDelete = $existingEntries->skip(3);
+            $deletedCount = $entriesToDelete->count();
+            
+            $this->info("Eliminando {$deletedCount} entradas antiguas (manteniendo las 3 primeras)...");
+            
+            foreach ($entriesToDelete as $entry) {
+                $entry->delete();
+            }
+        }
+
         $this->info("Importando " . count($data['items']) . " entradas...");
 
         $imported = 0;
