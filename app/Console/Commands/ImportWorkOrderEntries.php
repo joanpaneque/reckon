@@ -80,8 +80,21 @@ class ImportWorkOrderEntries extends Command
             }
 
             // Crear timestamps
-            $startedAt = Carbon::createFromFormat('Y-m-d H:i', $item['date'] . ' ' . $item['start_time']);
-            $endedAt = Carbon::createFromFormat('Y-m-d H:i', $item['date'] . ' ' . $item['end_time']);
+            try {
+                // Intentar parsear directamente (formato nuevo: "Y-m-d H:i:s")
+                if (strpos($item['start_time'], '-') !== false) {
+                    $startedAt = Carbon::parse($item['start_time']);
+                    $endedAt = Carbon::parse($item['end_time']);
+                } else {
+                    // Formato antiguo: solo hora, concatenar con fecha
+                    $startedAt = Carbon::createFromFormat('Y-m-d H:i', $item['date'] . ' ' . $item['start_time']);
+                    $endedAt = Carbon::createFromFormat('Y-m-d H:i', $item['date'] . ' ' . $item['end_time']);
+                }
+            } catch (\Exception $e) {
+                $this->warn("Error al parsear fechas para '{$item['title']}': {$e->getMessage()}");
+                $skipped++;
+                continue;
+            }
 
             // Crear la entrada
             WorkOrderEntry::create([
