@@ -5,6 +5,8 @@ namespace App\Http\Controllers\WorkOrders;
 use App\Http\Controllers\Controller;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Carbon\Carbon;
 
 use Inertia\Inertia;
 
@@ -228,5 +230,87 @@ class WorkOrdersController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Export work order entries to CSV
+     */
+    public function export(string $id)
+    {
+        $workOrder = WorkOrder::with('sharedWith')->findOrFail($id);
+
+        if (!$this->checkPermission($workOrder)) {
+            return abort(404);
+        }
+
+        $entries = $workOrder->entries()->with('createdBy')->orderBy('started_at', 'asc')->get();
+
+        $filename = 'work-order-' . $workOrder->id . '-' . Carbon::now()->format('Y-m-d') . '.csv';
+
+        return new StreamedResponse(function () use ($workOrder, $entries) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM para UTF-8 (permite que Excel abra correctamente caracteres especiales)
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Encabezados
+            fputcsv($handle, [
+                'Work Order',
+                'Entry Name',
+                'Description',
+                'Started At',
+                'Ended At',
+                'Duration (Hours)',
+                'Cost',
+                'Created By',
+                'Created At',
+            ]);
+
+            // Datos
+            foreach ($entries as $entry) {
+                $startedAt = $entry->started_at ? Carbon::parse($entry->started_at)->format('Y-m-d H:i:s') : '';
+                $endedAt = $entry->ended_at ? Carbon::parse($entry->ended_at)->format('Y-m-d H:i:s') : '';
+                
+                // Calcular duración en horas
+                $duration = 0;
+                if ($entry->started_at && $entry->ended_at) {
+                    $start = Carbon::parse($entry->started_at);
+                    $end = Carbon::parse($entry->ended_at);
+                    $duration = round($start->diffInSeconds($end) / 3600, 2);
+                }
+
+                // Calcular costo
+                $cost = $duration * $workOrder->hour_price;
+
+                fputcsv($handle, [
+                    $workOrder->name,
+                    $entry->name,
+                    $entry->description ?? '',
+                    $startedAt,
+                    $endedAt,
+                    $duration,
+                    number_format($cost, 2),
+                    $entry->createdBy->name ?? $entry->createdBy->email ?? '',
+                    $entry->created_at ? Carbon::parse($entry->created_at)->format('Y-m-d H:i:s') : '',
+                ]);
+            }
+
+            // Resumen al final
+            fputcsv($handle, []); // Línea vacía
+            fputcsv($handle, ['Summary']);
+            $timeAndCost = $workOrder->getTotalTimeAndCost();
+            $totalHours = round($timeAndCost['totalSeconds'] / 3600, 2);
+            fputcsv($handle, ['Total Hours', $totalHours]);
+            fputcsv($handle, ['Total Cost', number_format($timeAndCost['totalCost'], 2)]);
+            fputcsv($handle, ['Hour Price', number_format($workOrder->hour_price, 2)]);
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ]);
     }
 }

@@ -9,7 +9,7 @@ import Modal from '@/Components/Modal.vue';
 import SharedUsersIndicator from '@/Components/SharedUsersIndicator.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { Crown } from 'lucide-vue-next';
+import { Crown, Download } from 'lucide-vue-next';
 
 const page = usePage();
 const isOwner = computed(() => props.workOrder.user_id === page.props.auth.user.id);
@@ -82,9 +82,15 @@ const stopTimer = (entryId) => {
             <SharedUsersIndicator v-if="workOrder.shared_with" :shared-with="workOrder.shared_with" />
           </div>
         </div>
-        <LinkButton prefetch :href="route('work-orders.index')" variant="secondary">
-          Back to list
-        </LinkButton>
+        <div class="flex items-center gap-2">
+          <LinkButton :href="route('work-orders.export', workOrder.id)" variant="primary" size="sm" class="flex items-center gap-2">
+            <Download :size="16" />
+            Export CSV
+          </LinkButton>
+          <LinkButton prefetch :href="route('work-orders.index')" variant="secondary">
+            Back to list
+          </LinkButton>
+        </div>
       </div>
 
       <TimeSummary :total-seconds="totalTime" :total-cost="totalCost" :hour-price="workOrder.hour_price" />

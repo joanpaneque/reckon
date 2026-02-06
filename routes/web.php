@@ -28,6 +28,7 @@ Route::middleware('App\Http\Middleware\RequireAuth')->group(function () {
     })->name('index');
 
     Route::resource('work-orders', WorkOrdersController::class);
+    Route::get('work-orders/{id}/export', [WorkOrdersController::class, 'export'])->name('work-orders.export');
 
     Route::resource('work-orders.entries', WorkOrderEntriesController::class);
 
