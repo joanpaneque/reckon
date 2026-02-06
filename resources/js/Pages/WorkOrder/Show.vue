@@ -83,7 +83,7 @@ const stopTimer = (entryId) => {
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <LinkButton :href="route('work-orders.export', workOrder.id)" variant="primary" size="sm" class="flex items-center gap-2">
+          <LinkButton :href="route('work-orders.export', workOrder.id)" variant="primary" size="sm" class="flex items-center gap-2" external>
             <Download :size="16" />
             Export CSV
           </LinkButton>

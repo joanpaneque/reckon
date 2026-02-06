@@ -17,6 +17,7 @@ const props = defineProps({
     default: 'sm',
     validator: (value) => ['sm', 'md'].includes(value),
   },
+  external: Boolean,
 });
 
 defineEmits(['click']);
@@ -40,7 +41,10 @@ const classes = computed(() => {
 </script>
 
 <template>
-  <Link v-if="props.href" :href="props.href" :method="props.method" :data="props.data" :class="classes" :prefetch="props.prefetch">
+  <a v-if="props.href && props.external" :href="props.href" :class="classes">
+    <slot />
+  </a>
+  <Link v-else-if="props.href" :href="props.href" :method="props.method" :data="props.data" :class="classes" :prefetch="props.prefetch">
     <slot />
   </Link>
   <button v-else :class="classes" @click="$emit('click')">
